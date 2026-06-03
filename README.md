@@ -1,6 +1,6 @@
 # SaveForge
 
-SaveForge est un éditeur avancé de fichiers de sauvegarde orienté RPG et jeux utilisant des formats JSON, LZString ou Ruby Marshal.
+SaveForge[https://traycken.github.io/SaveEditor/] est un éditeur avancé de fichiers de sauvegarde orienté RPG et jeux utilisant des formats JSON, LZString ou Ruby Marshal.
 
 L'application fonctionne entièrement dans le navigateur, sans installation ni serveur, et permet d'explorer, comparer, modifier et exporter des sauvegardes de manière rapide et sécurisée.
 
