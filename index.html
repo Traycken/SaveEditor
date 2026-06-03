@@ -91,17 +91,47 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 .tt-btn i{font-size:12px}
 
 /* ── QUICK STATS ── */
-.qstats{display:flex;flex-wrap:wrap;gap:8px;padding:8px 8px 4px;border-bottom:1px solid rgba(28,45,66,.6)}
-.qs-card{background:var(--s2);border:1px solid var(--b0);border-radius:var(--r);padding:5px 10px;min-width:80px}
-.qs-label{font-size:10px;color:var(--mu);font-family:var(--sans);text-transform:uppercase;letter-spacing:.06em}
-.qs-val{font-size:14px;color:var(--cb);font-weight:600;margin-top:1px}
-.qs-actors{display:flex;gap:6px;flex-wrap:wrap;padding:6px 8px 4px;border-bottom:1px solid rgba(28,45,66,.6)}
-.qs-actor{background:var(--s2);border:1px solid var(--b0);border-radius:var(--r);padding:4px 8px;font-size:11px}
-.qs-aname{color:var(--cy);margin-bottom:2px;font-family:var(--sans)}
-.qs-ahp{color:var(--gr)}
-.qs-ahp.low{color:var(--yl)}
-.qs-ahp.dead{color:var(--rd)}
-.qs-alv{color:var(--mu)}
+/* ── QUICK STATS PANEL ── */
+.qs-panel{border-bottom:1px solid var(--b0);background:var(--s1)}
+.qs-section{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:6px 10px 4px}
+.qs-section+.qs-section{border-top:1px solid rgba(28,45,66,.5);padding-top:5px}
+.qs-stitle{font-size:9px;letter-spacing:.14em;color:var(--mu);text-transform:uppercase;
+  font-family:var(--sans);padding-right:6px;border-right:1px solid var(--b0);margin-right:2px;
+  white-space:nowrap;flex-shrink:0}
+.qs-card{background:var(--s2);border:1px solid var(--b0);border-radius:var(--r);padding:4px 9px;
+  min-width:72px;flex-shrink:0}
+.qs-label{font-size:10px;color:var(--mu);font-family:var(--sans);text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:1px}
+.qs-val{font-size:13px;color:var(--cb);font-weight:600;line-height:1.4}
+.qs-editable{cursor:text;border-bottom:1px dashed rgba(229,121,26,.4);transition:.1s}
+.qs-editable:hover{border-bottom-color:var(--ca);color:var(--ca)}
+.qs-edit-inp{background:transparent;border:none;border-bottom:1px solid var(--ca);outline:none;
+  font-family:var(--mono);font-size:13px;font-weight:600;width:90px;padding:0;color:var(--ca)}
+/* Actor cards */
+.qs-actors-row{display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px 6px;
+  border-top:1px solid rgba(28,45,66,.5)}
+.qs-ac{background:var(--s2);border:1px solid var(--b0);border-radius:var(--r);
+  padding:7px 10px;width:168px;flex-shrink:0}
+.qs-ac-hdr{display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:5px;gap:6px}
+.qs-ac-name{color:var(--cy);font-size:12px;font-family:var(--sans);font-weight:600;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qs-ac-lv{color:var(--mu);font-size:11px;font-family:var(--sans);white-space:nowrap;flex-shrink:0}
+.qs-ac-lv .qs-editable{color:var(--mu)}
+.qs-ac-stat{display:flex;align-items:baseline;gap:4px;margin-bottom:2px}
+.qs-ac-stlbl{font-size:9px;letter-spacing:.08em;color:var(--mu);font-family:var(--sans);
+  text-transform:uppercase;width:20px;flex-shrink:0}
+.qs-ac-nums{display:flex;align-items:baseline;gap:1px;font-size:12px}
+.qs-ac-sep{color:var(--b2);font-size:10px;margin:0 1px}
+.qs-bar{height:3px;background:var(--b0);border-radius:2px;margin-bottom:4px;overflow:hidden}
+.qs-bar-fill{height:100%;border-radius:2px}
+.qs-ac-extra{display:flex;justify-content:space-between;margin-top:3px;
+  border-top:1px solid rgba(28,45,66,.7);padding-top:4px;gap:4px;flex-wrap:wrap}
+.qs-ac-xitem{font-size:11px}
+.qs-ac-xlbl{color:var(--mu);font-family:var(--sans);font-size:9px;letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:1px}
+.qs-ac-states{margin-top:4px;border-top:1px solid rgba(28,45,66,.7);padding-top:3px;
+  font-size:10px;color:var(--rd);font-family:var(--sans)}
 
 /* ── TREE ── */
 .tr-root{padding:2px 4px}
@@ -495,56 +525,230 @@ function filterByCat(data,catId,cats){
 // ═══════════════════════════════════════════════════
 // QUICK STATS (RPG Maker MZ)
 // ═══════════════════════════════════════════════════
-function buildQuickStats(data){
+function buildQuickStats(data, fileId){
   const frag=document.createDocumentFragment();
-  try{
-    // Party stats
-    const p=data.party;
-    const sys=data.system;
-    if(p||sys){
-      const row=document.createElement('div');row.className='qstats';
-      const add=(label,val,color)=>{
-        const c=document.createElement('div');c.className='qs-card';
-        c.innerHTML=`<div class="qs-label">${label}</div><div class="qs-val" style="${color?'color:'+color:''}">${val??'—'}</div>`;
-        row.appendChild(c);
-      };
-      if(p){
-        add('Gold', p._gold!==undefined?p._gold.toLocaleString():null,'var(--yl)');
-        add('Steps', p._steps!==undefined?p._steps.toLocaleString():null);
-      }
-      if(sys){
-        add('Battles',sys._battleCount);
-        add('Wins',sys._winCount,'var(--gr)');
-        add('Saves',sys._saveCount,'var(--cy)');
-        add('Frames',sys._framesOnSave);
-      }
-      if(data.player){
-        const pl=data.player;
-        add('Map ID',data.map?._mapId??pl._mapId);
-        add('Position',`${pl._x??'?'}, ${pl._y??'?'}`,'var(--bl)');
-      }
-      frag.appendChild(row);
+  if(!data||typeof data!=='object')return frag;
+  const af=App.files.find(f=>f.id===fileId);
+  const p=data.party||{}, sys=data.system||{}, pl=data.player||{}, mp=data.map||{};
+
+  // ── Editable value element ──────────────────────────────
+  function qsVal(path, raw, opts={}){
+    const{color,fmt,suffix='',ro=false}=opts;
+    const displayed = fmt ? fmt(raw) : (raw!=null ? String(raw) : '—');
+    const el=document.createElement('div');
+    el.className='qs-val';
+    if(color)el.style.color=color;
+    el.textContent=displayed+(suffix&&raw!=null?suffix:'');
+    if(!ro&&af&&af.encoder&&raw!=null){
+      el.classList.add('qs-editable');
+      el.title='Click to edit';
+      el.addEventListener('click',e=>{
+        e.stopPropagation();
+        const inp=document.createElement('input');
+        inp.className='qs-edit-inp';
+        inp.value=String(raw);
+        if(color)inp.style.color=color;
+        el.replaceWith(inp);inp.focus();inp.select();
+        const commit=()=>{
+          const r=inp.value.trim();
+          let nv;
+          if(r==='null')nv=null;
+          else if(r==='true')nv=true;
+          else if(r==='false')nv=false;
+          else if(r!==''&&!isNaN(r))nv=Number(r);
+          else nv=inp.value;
+          if(JSON.stringify(nv)!==JSON.stringify(raw)){
+            pushUndo(af,path,raw,nv);setPath(af.data,path,nv);
+            af.modified=true;updateTabs();updateStatus();updateUndoBtns();
+          }
+          renderContent();
+        };
+        inp.addEventListener('blur',commit);
+        inp.addEventListener('keydown',e=>{
+          if(e.key==='Enter'){e.preventDefault();inp.blur()}
+          if(e.key==='Escape')renderContent();
+        });
+      });
     }
-    // Actors
-    const actData=data.actors?._data;
-    if(actData&&Array.isArray(actData)){
-      const actors=actData.filter(a=>a&&typeof a==='object'&&a._name);
-      if(actors.length){
-        const row2=document.createElement('div');row2.className='qs-actors';
-        for(const a of actors.slice(0,8)){
-          const card=document.createElement('div');card.className='qs-actor';
-          const hp=a._hp;const mhp=a._mhp||a._param?.[0];
-          const ratio=mhp?hp/mhp:1;
-          const cls=ratio<0.25?'dead':ratio<0.5?'low':'';
-          card.innerHTML=`<div class="qs-aname">${esc(a._name)}</div>`+
-            `<div class="qs-ahp ${cls}">${hp??'?'}/${mhp??'?'} HP</div>`+
-            `<div class="qs-alv">Lv ${a._level??'?'}</div>`;
-          row2.appendChild(card);
+    return el;
+  }
+
+  // ── Card helper ─────────────────────────────────────────
+  function mkCard(label, valEl){
+    const c=document.createElement('div');c.className='qs-card';
+    const lbl=document.createElement('div');lbl.className='qs-label';lbl.textContent=label;
+    c.appendChild(lbl);
+    if(typeof valEl==='string'){const d=document.createElement('div');d.className='qs-val';d.textContent=valEl;c.appendChild(d);}
+    else c.appendChild(valEl);
+    return c;
+  }
+
+  // ── Section helper ──────────────────────────────────────
+  function mkSection(title, cards){
+    const s=document.createElement('div');s.className='qs-section';
+    const t=document.createElement('span');t.className='qs-stitle';t.textContent=title;
+    s.appendChild(t);
+    cards.forEach(c=>{if(c)s.appendChild(c)});
+    return s;
+  }
+
+  const panel=document.createElement('div');panel.className='qs-panel';
+
+  // ── Section 1: Party Progress ───────────────────────────
+  const progCards=[];
+  if(p._gold!=null)    progCards.push(mkCard('Gold',    qsVal('party._gold',    p._gold,    {color:'var(--yl)'})));
+  if(p._steps!=null)   progCards.push(mkCard('Steps',   qsVal('party._steps',   p._steps)));
+  if(sys._battleCount!=null) progCards.push(mkCard('Battles', qsVal('system._battleCount', sys._battleCount)));
+  if(sys._winCount!=null)    progCards.push(mkCard('Wins',    qsVal('system._winCount',    sys._winCount,    {color:'var(--gr)'})));
+  if(sys._escapeCount!=null) progCards.push(mkCard('Escapes', qsVal('system._escapeCount', sys._escapeCount, {color:'var(--rd)'})));
+  if(sys._saveCount!=null)   progCards.push(mkCard('Saves',   qsVal('system._saveCount',   sys._saveCount,   {color:'var(--cy)'})));
+  // Play time from frames
+  if(sys._framesOnSave!=null){
+    const sec=Math.floor(sys._framesOnSave/60);
+    const hms=`${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor(sec%3600/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+    progCards.push(mkCard('Play Time', qsVal('system._framesOnSave', sys._framesOnSave, {color:'var(--pu)',fmt:()=>hms,ro:false})));
+  }
+  if(progCards.length)panel.appendChild(mkSection('Party Progress', progCards));
+
+  // ── Section 2: Location & System ───────────────────────
+  const locCards=[];
+  if(mp._mapId!=null)    locCards.push(mkCard('Map ID',   qsVal('map._mapId',    mp._mapId,    {color:'var(--bl)'})));
+  if(pl._x!=null)        locCards.push(mkCard('Pos X',    qsVal('player._x',     pl._x)));
+  if(pl._y!=null)        locCards.push(mkCard('Pos Y',    qsVal('player._y',     pl._y)));
+  const dirMap={2:'↓ South',4:'← West',6:'→ East',8:'↑ North'};
+  if(pl._direction!=null) locCards.push(mkCard('Direction', qsVal('player._direction', pl._direction, {fmt:v=>dirMap[v]||String(v)})));
+  if(sys._bgm?._name)    locCards.push(mkCard('BGM',      qsVal('system._bgm._name', sys._bgm._name, {color:'var(--pu)'})));
+  if(sys._windowTone)    locCards.push(mkCard('Window Tone', qsVal('system._windowTone', JSON.stringify(sys._windowTone), {ro:true,color:'var(--mu)'})));
+  if(locCards.length)panel.appendChild(mkSection('Location & System', locCards));
+
+  // ── Section 3: Inventory ───────────────────────────────
+  const invCards=[];
+  if(p._items!=null){
+    const cnt=Object.keys(p._items||{}).length;
+    invCards.push(mkCard('Items',   qsVal('party._items',   cnt,  {ro:true})));
+  }
+  if(p._weapons!=null){
+    const cnt=Object.keys(p._weapons||{}).length;
+    invCards.push(mkCard('Weapons', qsVal('party._weapons', cnt,  {ro:true})));
+  }
+  if(p._armors!=null){
+    const cnt=Object.keys(p._armors||{}).length;
+    invCards.push(mkCard('Armors',  qsVal('party._armors',  cnt,  {ro:true})));
+  }
+  // Most stacked items (top 3)
+  if(p._items&&typeof p._items==='object'){
+    const top=Object.entries(p._items).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    top.forEach(([id,qty])=>invCards.push(mkCard(`Item #${id}`, qsVal(`party._items.${id}`, qty, {color:'var(--cy)'}))));
+  }
+  if(invCards.length)panel.appendChild(mkSection('Inventory', invCards));
+
+  // ── Section 4: Actors (rich cards) ─────────────────────
+  const actorsData=data.actors?._data;
+  if(actorsData&&Array.isArray(actorsData)){
+    const validActors=actorsData.map((a,i)=>({a,i})).filter(({a})=>a&&typeof a==='object'&&a._name);
+    if(validActors.length){
+      const actRow=document.createElement('div');actRow.className='qs-actors-row';
+
+      for(const{a,i}of validActors.slice(0,8)){
+        const bp=`actors._data.${i}`;
+        const card=document.createElement('div');card.className='qs-ac';
+
+        // ── Header: Name + Level ──
+        const hdr=document.createElement('div');hdr.className='qs-ac-hdr';
+        const nameEl=document.createElement('div');nameEl.className='qs-ac-name';
+        nameEl.title=a._name;nameEl.textContent=a._name;
+        const lvWrap=document.createElement('div');lvWrap.className='qs-ac-lv';
+        lvWrap.appendChild(document.createTextNode('Lv '));
+        lvWrap.appendChild(qsVal(`${bp}._level`,a._level,{color:'var(--mu)'}));
+        hdr.appendChild(nameEl);hdr.appendChild(lvWrap);
+        card.appendChild(hdr);
+
+        // ── HP ──
+        const mhp=a._mhp??a._param?.[0];
+        if(a._hp!=null&&mhp){
+          const ratio=Math.max(0,Math.min(1,a._hp/mhp));
+          const hpCol=ratio<0.25?'var(--rd)':ratio<0.5?'var(--yl)':'var(--gr)';
+          const hpRow=document.createElement('div');hpRow.className='qs-ac-stat';
+          const lbl=document.createElement('div');lbl.className='qs-ac-stlbl';lbl.textContent='HP';
+          const nums=document.createElement('div');nums.className='qs-ac-nums';
+          nums.appendChild(qsVal(`${bp}._hp`,a._hp,{color:hpCol}));
+          const sep=document.createElement('span');sep.className='qs-ac-sep';sep.textContent='/';
+          nums.appendChild(sep);
+          nums.appendChild(qsVal(`${bp}._mhp`,mhp,{color:'var(--mu)'}));
+          hpRow.appendChild(lbl);hpRow.appendChild(nums);card.appendChild(hpRow);
+          const bar=document.createElement('div');bar.className='qs-bar';
+          const fill=document.createElement('div');fill.className='qs-bar-fill';
+          fill.style.cssText=`width:${Math.round(ratio*100)}%;background:${hpCol}`;
+          bar.appendChild(fill);card.appendChild(bar);
         }
-        frag.appendChild(row2);
+
+        // ── MP ──
+        const mmp=a._mmp??a._param?.[1];
+        if(a._mp!=null&&mmp){
+          const mpRatio=Math.max(0,Math.min(1,a._mp/mmp));
+          const mpRow=document.createElement('div');mpRow.className='qs-ac-stat';
+          const lbl=document.createElement('div');lbl.className='qs-ac-stlbl';lbl.textContent='MP';
+          const nums=document.createElement('div');nums.className='qs-ac-nums';
+          nums.appendChild(qsVal(`${bp}._mp`,a._mp,{color:'var(--bl)'}));
+          const sep=document.createElement('span');sep.className='qs-ac-sep';sep.textContent='/';
+          nums.appendChild(sep);
+          nums.appendChild(qsVal(`${bp}._mmp`,mmp,{color:'var(--mu)'}));
+          mpRow.appendChild(lbl);mpRow.appendChild(nums);card.appendChild(mpRow);
+          const bar=document.createElement('div');bar.className='qs-bar';
+          const fill=document.createElement('div');fill.className='qs-bar-fill';
+          fill.style.cssText=`width:${Math.round(mpRatio*100)}%;background:var(--bl);opacity:.7`;
+          bar.appendChild(fill);card.appendChild(bar);
+        }
+
+        // ── TP ──
+        if(a._tp!=null){
+          const tpRow=document.createElement('div');tpRow.className='qs-ac-stat';
+          const lbl=document.createElement('div');lbl.className='qs-ac-stlbl';lbl.textContent='TP';
+          const val=qsVal(`${bp}._tp`,a._tp,{color:'var(--cb)'});
+          tpRow.appendChild(lbl);tpRow.appendChild(val);card.appendChild(tpRow);
+        }
+
+        // ── Extra row: EXP + Skills + States ──
+        const extra=document.createElement('div');extra.className='qs-ac-extra';
+
+        if(a._exp!=null){
+          const ex=document.createElement('div');ex.className='qs-ac-xitem';
+          const xl=document.createElement('div');xl.className='qs-ac-xlbl';xl.textContent='EXP';
+          const xv=qsVal(`${bp}._exp`,a._exp,{color:'var(--pu)'});
+          ex.appendChild(xl);ex.appendChild(xv);extra.appendChild(ex);
+        }
+        if(Array.isArray(a._skills)){
+          const ex=document.createElement('div');ex.className='qs-ac-xitem';
+          const xl=document.createElement('div');xl.className='qs-ac-xlbl';xl.textContent='Skills';
+          const xv=document.createElement('div');xv.className='qs-val';
+          xv.style.fontSize='12px';xv.textContent=a._skills.length;
+          ex.appendChild(xl);ex.appendChild(xv);extra.appendChild(ex);
+        }
+        if(Array.isArray(a._equips)){
+          const equipped=a._equips.filter(e=>e&&(e._itemId||e._dataId));
+          const ex=document.createElement('div');ex.className='qs-ac-xitem';
+          const xl=document.createElement('div');xl.className='qs-ac-xlbl';xl.textContent='Equips';
+          const xv=document.createElement('div');xv.className='qs-val';
+          xv.style.fontSize='12px';xv.textContent=`${equipped.length}/${a._equips.length}`;
+          ex.appendChild(xl);ex.appendChild(xv);extra.appendChild(ex);
+        }
+
+        if(extra.children.length)card.appendChild(extra);
+
+        // ── Active States ──
+        if(Array.isArray(a._states)&&a._states.length){
+          const st=document.createElement('div');st.className='qs-ac-states';
+          st.textContent=`States: [${a._states.slice(0,6).join(', ')}${a._states.length>6?'…':''}]`;
+          card.appendChild(st);
+        }
+
+        actRow.appendChild(card);
       }
+      panel.appendChild(actRow);
     }
-  }catch{}
+  }
+
+  if(panel.children.length)frag.appendChild(panel);
   return frag;
 }
 
@@ -1282,9 +1486,9 @@ function renderContent(){
   const data=typeof af.data==='object'&&af.data?filterByCat(af.data,af.cat,af.cats||CATS_GEN):af.data;
 
   // Quick stats
-  const isRpgRoot=af.cats===CATS_MZ&&(af.cat==='all'||af.cat==='party'||af.cat==='actors');
+  const isRpgRoot=af.cats===CATS_MZ&&(af.cat==='all'||af.cat==='party'||af.cat==='actors'||af.cat==='system'||af.cat==='player');
   if(isRpgRoot&&af.data){
-    const frag=buildQuickStats(af.data);
+    const frag=buildQuickStats(af.data, af.id);
     if(frag.childNodes.length)va.appendChild(frag);
   }
 
