@@ -181,9 +181,3 @@ Formats pris en charge :
 4. Exporter les fichiers mis à jour.
 
 Aucune installation requise.
-
----
-
-## 📄 Licence
-
-Projet distribué sous la licence de votre choix.
