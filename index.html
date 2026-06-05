@@ -37,6 +37,55 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 /* ── TABS ── */
 #tabs{background:var(--s1);border-bottom:2px solid var(--b0);display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none}
 #tabs
+
+/* ── ES3 UNLOCK PANEL ── */
+.es3-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:16px;padding:24px}
+.es3-card{background:var(--s2);border:1px solid var(--b1);border-radius:8px;
+  padding:24px 28px;width:420px;max-width:94vw;display:flex;flex-direction:column;gap:14px}
+.es3-hdr{display:flex;align-items:center;gap:10px;font-family:var(--sans)}
+.es3-hdr i{font-size:22px;color:var(--ca)}
+.es3-title{font-size:14px;color:var(--tx);font-weight:600}
+.es3-sub{font-size:12px;color:var(--mu);font-family:var(--sans);line-height:1.6}
+.es3-row{display:flex;gap:8px;align-items:center}
+.es3-inp{flex:1;background:var(--bg);border:1px solid var(--b1);color:var(--tx);
+  padding:6px 10px;border-radius:var(--r);font-family:var(--mono);font-size:13px;outline:none}
+.es3-inp:focus{border-color:var(--ca)}
+.es3-status{font-size:11px;font-family:var(--sans);min-height:16px;transition:.2s}
+.es3-status.ok{color:var(--gr)}
+.es3-status.err{color:var(--rd)}
+.es3-status.loading{color:var(--mu)}
+.es3-schemes{font-size:11px;color:var(--mu);font-family:var(--sans)}
+.es3-schemes summary{cursor:pointer;color:var(--mu)}
+.es3-schemes summary:hover{color:var(--tx)}
+.es3-schemes ul{margin-top:6px;padding-left:16px;line-height:2}
+
+/* ── LOG VIEWER ── */
+.log-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden;font-family:var(--mono);font-size:12px}
+.log-toolbar{display:flex;gap:8px;align-items:center;padding:6px 10px;
+  border-bottom:1px solid var(--b0);background:var(--s1);flex-shrink:0}
+.log-filter{background:var(--s2);border:1px solid var(--b0);color:var(--tx);
+  padding:3px 8px;border-radius:var(--r);font-family:var(--mono);font-size:12px;
+  outline:none;flex:1}
+.log-filter:focus{border-color:var(--ca)}
+.log-lvl-btns{display:flex;gap:2px}
+.log-lvl{padding:2px 7px;border:1px solid var(--b0);background:transparent;
+  cursor:pointer;font-size:11px;border-radius:3px;font-family:var(--sans);transition:.1s}
+.log-lvl:hover,.log-lvl.act{color:var(--tx);border-color:var(--b1);background:var(--s2)}
+.log-body{overflow:auto;flex:1;padding:4px 0}
+.log-line{display:flex;gap:0;padding:1px 0;line-height:1.6}
+.log-line:hover{background:var(--s2)}
+.log-ln{color:var(--mu);width:44px;text-align:right;padding-right:10px;
+  flex-shrink:0;font-size:11px;user-select:none}
+.log-txt{flex:1;padding-right:12px;white-space:pre-wrap;word-break:break-all}
+.log-line.ll-error .log-txt{color:var(--rd)}
+.log-line.ll-warn  .log-txt{color:var(--yl)}
+.log-line.ll-debug .log-txt{color:var(--mu)}
+.log-line.ll-info  .log-txt{color:var(--tx)}
+.log-line.ll-stack .log-txt{color:var(--mu);padding-left:14px;font-size:11px}
+
+/* ── VDF / plain format badge ── */
+
 /* ══ GALLERY ══════════════════════════════════════════════════ */
 .gal-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
 .gal-toolbar{display:flex;gap:8px;align-items:center;padding:7px 10px;
@@ -363,6 +412,55 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 
 /* ── SCROLLBARS ── */
 
+
+/* ── ES3 UNLOCK PANEL ── */
+.es3-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:16px;padding:24px}
+.es3-card{background:var(--s2);border:1px solid var(--b1);border-radius:8px;
+  padding:24px 28px;width:420px;max-width:94vw;display:flex;flex-direction:column;gap:14px}
+.es3-hdr{display:flex;align-items:center;gap:10px;font-family:var(--sans)}
+.es3-hdr i{font-size:22px;color:var(--ca)}
+.es3-title{font-size:14px;color:var(--tx);font-weight:600}
+.es3-sub{font-size:12px;color:var(--mu);font-family:var(--sans);line-height:1.6}
+.es3-row{display:flex;gap:8px;align-items:center}
+.es3-inp{flex:1;background:var(--bg);border:1px solid var(--b1);color:var(--tx);
+  padding:6px 10px;border-radius:var(--r);font-family:var(--mono);font-size:13px;outline:none}
+.es3-inp:focus{border-color:var(--ca)}
+.es3-status{font-size:11px;font-family:var(--sans);min-height:16px;transition:.2s}
+.es3-status.ok{color:var(--gr)}
+.es3-status.err{color:var(--rd)}
+.es3-status.loading{color:var(--mu)}
+.es3-schemes{font-size:11px;color:var(--mu);font-family:var(--sans)}
+.es3-schemes summary{cursor:pointer;color:var(--mu)}
+.es3-schemes summary:hover{color:var(--tx)}
+.es3-schemes ul{margin-top:6px;padding-left:16px;line-height:2}
+
+/* ── LOG VIEWER ── */
+.log-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden;font-family:var(--mono);font-size:12px}
+.log-toolbar{display:flex;gap:8px;align-items:center;padding:6px 10px;
+  border-bottom:1px solid var(--b0);background:var(--s1);flex-shrink:0}
+.log-filter{background:var(--s2);border:1px solid var(--b0);color:var(--tx);
+  padding:3px 8px;border-radius:var(--r);font-family:var(--mono);font-size:12px;
+  outline:none;flex:1}
+.log-filter:focus{border-color:var(--ca)}
+.log-lvl-btns{display:flex;gap:2px}
+.log-lvl{padding:2px 7px;border:1px solid var(--b0);background:transparent;
+  cursor:pointer;font-size:11px;border-radius:3px;font-family:var(--sans);transition:.1s}
+.log-lvl:hover,.log-lvl.act{color:var(--tx);border-color:var(--b1);background:var(--s2)}
+.log-body{overflow:auto;flex:1;padding:4px 0}
+.log-line{display:flex;gap:0;padding:1px 0;line-height:1.6}
+.log-line:hover{background:var(--s2)}
+.log-ln{color:var(--mu);width:44px;text-align:right;padding-right:10px;
+  flex-shrink:0;font-size:11px;user-select:none}
+.log-txt{flex:1;padding-right:12px;white-space:pre-wrap;word-break:break-all}
+.log-line.ll-error .log-txt{color:var(--rd)}
+.log-line.ll-warn  .log-txt{color:var(--yl)}
+.log-line.ll-debug .log-txt{color:var(--mu)}
+.log-line.ll-info  .log-txt{color:var(--tx)}
+.log-line.ll-stack .log-txt{color:var(--mu);padding-left:14px;font-size:11px}
+
+/* ── VDF / plain format badge ── */
+
 /* ══ GALLERY ══════════════════════════════════════════════════ */
 .gal-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
 .gal-toolbar{display:flex;gap:8px;align-items:center;padding:7px 10px;
@@ -495,7 +593,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
     <div id="logo">SAVE<b>FORGE</b></div>
     <div class="spacer"></div>
     <span class="undo-info" id="undo-info"></span>
-    <input type="file" id="fi" multiple accept=".rpgsave,.rmmzsave,.rvdata,.rvdata2,.rxdata,.json,.nson,.dat,.data,.sav,.save" hidden>
+    <input type="file" id="fi" multiple accept=".rpgsave,.rmmzsave,.rvdata,.rvdata2,.rxdata,.json,.nson,.dat,.data,.sav,.save,.es3,.bak,.vdf,.log,.txt,.ini,.cfg,.csv" hidden>
     <button class="hbtn" id="fnr-btn" title="Find &amp; Replace (Ctrl+H)"><i class="ti ti-replace"></i></button>
     <button class="hbtn" id="jtp-btn" title="Jump to path (Ctrl+G)"><i class="ti ti-arrow-right"></i></button>
     <input type="file" id="gfi" multiple accept=".rpgmvp,.png_" hidden>
@@ -612,6 +710,12 @@ const FMT = {
   binary:   {label:'Binary',        color:'#4e6080',editable:false},
   pasted:   {label:'Pasted',        color:'#4dd9ff',editable:true},
   error:    {label:'Error',         color:'#ff5060',editable:false},
+  es3:      {label:'ES3 Encrypted', color:'#ff9057',editable:false},
+  es3ok:    {label:'ES3 Decrypted', color:'#ffa640',editable:true },
+  vdf:      {label:'Valve VDF',     color:'#4dd9ff',editable:true },
+  log:      {label:'Text Log',      color:'#7ee787',editable:false},
+  text:     {label:'Plain Text',    color:'#7ee787',editable:false},
+
 };
 
 async function parseContent(text, buf) {
@@ -634,14 +738,119 @@ async function parseContent(text, buf) {
   return{format:'error',data:{_error:'Unknown format'},encoder:null};
 }
 
+// VDF parser
+function parseVDF(text) {
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const root = {}, stack = [root];
+  let pk = null;
+  for (const line of lines) {
+    if(line==='{'){
+      if(pk){const o={};stack[stack.length-1][pk]=o;stack.push(o);pk=null}
+    } else if(line==='}'){
+      if(stack.length>1)stack.pop();
+    } else {
+      const m=line.match(/^"([^"]*)"(?:\s+"([^"]*)")?/);
+      if(m){m[2]!==undefined?stack[stack.length-1][m[1]]=m[2]:pk=m[1]}
+    }
+  }
+  return root;
+}
+
+// ES3 decrypt using Web Crypto API
+async function decryptES3(arrayBuffer, password) {
+  const bytes=new Uint8Array(arrayBuffer), enc=new TextEncoder();
+  const pwdBytes=enc.encode(password);
+
+  async function tryAES(keyBytes, iv, ct) {
+    try {
+      if(ct.length%16!==0)return null;
+      const k=await crypto.subtle.importKey('raw',keyBytes,'AES-CBC',false,['decrypt']);
+      const pt=await crypto.subtle.decrypt({name:'AES-CBC',iv},k,ct);
+      const txt=new TextDecoder('utf-8',{fatal:false}).decode(pt).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').trim();
+      if(txt.startsWith('{')||txt.startsWith('['))return txt;
+      return null;
+    } catch { return null; }
+  }
+
+  async function pbkdf2Key(salt, iters=1000) {
+    const km=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);
+    const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iters,hash:'SHA-1'},km,{name:'AES-CBC',length:128},true,['decrypt']);
+    return new Uint8Array(await crypto.subtle.exportKey('raw',k));
+  }
+
+  // Scheme A: raw password padded to 16B, IV at byte 0
+  const rawKey=new Uint8Array(16); rawKey.set(pwdBytes.slice(0,16));
+  const a=await tryAES(rawKey, bytes.slice(0,16), bytes.slice(16));
+  if(a)return{text:a,scheme:'raw-key'};
+
+  // Scheme B: PBKDF2 with hardcoded salts, IV at byte 0
+  for(const salt of ['Easy Save 3','ES3','EasySave3','unity','save']){
+    const k=await pbkdf2Key(enc.encode(salt)).catch(()=>null);
+    if(!k)continue;
+    const r=await tryAES(k, bytes.slice(0,16), bytes.slice(16));
+    if(r)return{text:r,scheme:'pbkdf2-'+salt};
+  }
+
+  // Scheme C: file-embedded 8B salt + 16B IV + ciphertext
+  if(bytes.length>=40){
+    const k=await pbkdf2Key(bytes.slice(0,8)).catch(()=>null);
+    if(k){const r=await tryAES(k,bytes.slice(8,24),bytes.slice(24));if(r)return{text:r,scheme:'salt8+iv'}}
+  }
+
+  // Scheme D: file-embedded 16B salt + 16B IV + ciphertext (ES3 v3+)
+  if(bytes.length>=48){
+    const k=await pbkdf2Key(bytes.slice(0,16)).catch(()=>null);
+    if(k){const r=await tryAES(k,bytes.slice(16,32),bytes.slice(32));if(r)return{text:r,scheme:'salt16+iv'}}
+  }
+
+  return null;
+}
+
 async function parseFile(file) {
+  const ext=file.name.split('.').pop().toLowerCase();
   let text='', buf=null;
   try{text=await readText(file)}catch{}
   try{buf=await readBuf(file)}catch{}
+
+  // ES3 / BAK → encrypted Unity save
+  if(['es3','bak'].includes(ext)){
+    // Try plain JSON first (unencrypted ES3)
+    try{const d=JSON.parse(text.trim());return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text,buf}}catch{}
+    // Encrypted — return locked format with buffer
+    return{format:'es3',data:{_encrypted:true,_file:file.name,_size:file.size},encoder:null,raw:text,buf};
+  }
+
+  // VDF (Valve Data Format)
+  if(ext==='vdf'){
+    try{const d=parseVDF(text);return{format:'vdf',data:d,encoder:d=>vdfStringify(d),raw:text}}catch{}
+  }
+
+  // Log / plain text
+  if(['log','txt','ini','cfg','csv'].includes(ext)){
+    return{format:'log',data:text,encoder:null,raw:text};
+  }
+
   const r=await parseContent(text,buf);
   r.raw=r.raw||text;
   return r;
 }
+
+// VDF serializer (for editable VDF)
+function vdfStringify(obj, indent=0) {
+  const tab='\t'.repeat(indent);
+  let out='';
+  for(const[k,v]of Object.entries(obj)){
+    if(typeof v==='object'&&v!==null){
+      out+=tab+JSON.stringify(k)+'\n'+tab+'{\n';
+      out+=vdfStringify(v,indent+1);
+      out+=tab+'}\n';
+    } else {
+      out+=tab+JSON.stringify(k)+'\t\t'+JSON.stringify(String(v))+'\n';
+    }
+  }
+  return out;
+}
+
 
 // ═══════════════════════════════════════════════════
 // CATEGORY DETECTION
@@ -1225,8 +1434,185 @@ function collapseAll(container){
 }
 
 // ═══════════════════════════════════════════════════
-// GALLERY — RPGMVP DECRYPT & DISPLAY
+// ES3 UNLOCK PANEL
 // ═══════════════════════════════════════════════════
+function buildES3Panel(af){
+  const wrap=document.createElement('div');wrap.className='es3-panel';
+  const card=document.createElement('div');card.className='es3-card';
+
+  card.innerHTML=`
+    <div class="es3-hdr"><i class="ti ti-lock"></i>
+      <div>
+        <div class="es3-title">Easy Save 3 — Encrypted File</div>
+      </div>
+    </div>
+    <div class="es3-sub">
+      This <b>${af.name}</b> (${(af.data._size/1024).toFixed(1)} KB) is AES-128-CBC encrypted.<br>
+      Enter the encryption password set in the game's ES3 settings.
+      The editor will try multiple key-derivation schemes automatically.
+    </div>
+    <div class="es3-row">
+      <input class="es3-inp" id="es3-pwd" type="password" placeholder="Encryption password…" autocomplete="off" spellcheck="false">
+      <button class="hbtn p" id="es3-go"><i class="ti ti-lock-open"></i> Decrypt</button>
+    </div>
+    <div class="es3-status" id="es3-status"></div>
+    <details class="es3-schemes">
+      <summary>Schemes tried automatically</summary>
+      <ul>
+        <li>Raw password bytes (16B key), IV at byte 0</li>
+        <li>PBKDF2-SHA1 × 1000 with salts: "Easy Save 3", "ES3", "EasySave3"…</li>
+        <li>PBKDF2-SHA1 with file-embedded salt (8B prefix + 16B IV)</li>
+        <li>PBKDF2-SHA1 with file-embedded salt (16B prefix + 16B IV, ES3 v3+)</li>
+      </ul>
+    </details>`;
+
+  const status=card.querySelector('#es3-status');
+  const go=card.querySelector('#es3-go');
+  const inp=card.querySelector('#es3-pwd');
+
+  const attempt=async()=>{
+    const pwd=inp.value;
+    status.textContent='Trying decryption…';status.className='es3-status loading';
+    go.disabled=true;
+
+    try{
+      const res=await decryptES3(af.buf, pwd);
+
+      if(res&&res.text){
+        try{
+          const data=JSON.parse(res.text);
+          af.format='es3ok';af.data=data;
+          af.encoder=d=>encryptES3Back(JSON.stringify(d),pwd,af.buf);
+          af.modified=false;
+          status.textContent=`✓ Decrypted! Scheme: ${res.scheme}`;status.className='es3-status ok';
+          setTimeout(()=>renderContent(),600);
+        }catch(e){
+          status.textContent=`Decrypted but JSON parse failed: ${e.message}`;status.className='es3-status err';
+        }
+      } else {
+        status.textContent='Decryption failed — password incorrect or unsupported format';
+        status.className='es3-status err';
+      }
+    }catch(e){
+      status.textContent='Error: '+e.message;status.className='es3-status err';
+    }
+    go.disabled=false;
+  };
+
+  go.addEventListener('click',attempt);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')attempt()});
+
+  // Also add file re-read helper: store ArrayBuffer when file loads
+  if(!af.buf&&af.raw){
+    // Try to reconstruct from raw text (if it was read as text, might be corrupted for binary)
+    // Better: store the buf during parseFile
+  }
+
+  wrap.appendChild(card);
+  return wrap;
+}
+
+// Stub re-encryptor (decryption-only for now — re-encryption needs same IV/salt)
+async function encryptES3Back(jsonText, password, origBuf) {
+  // For now: return the original encrypted bytes (re-encryption TBD)
+  toast('Note: re-encryption not yet supported — exporting original encrypted file');
+  return origBuf ? new Uint8Array(origBuf) : new TextEncoder().encode(jsonText);
+}
+
+// ═══════════════════════════════════════════════════
+// LOG / TEXT VIEWER
+// ═══════════════════════════════════════════════════
+const LOG_LEVELS={
+  error:/\b(error|exception|fail|fatal|crash)\b/i,
+  warn: /\b(warn|warning|caution)\b/i,
+  stack:/^\s+at |^\s+UnityEngine\.|^\s+System\./,
+};
+function classifyLine(line){
+  if(LOG_LEVELS.error.test(line))return 'll-error';
+  if(LOG_LEVELS.warn.test(line))return 'll-warn';
+  if(LOG_LEVELS.stack.test(line))return 'll-stack';
+  if(line.trim().startsWith('['))return 'll-debug';
+  return 'll-info';
+}
+
+function buildLogView(af){
+  const text=typeof af.data==='string'?af.data:'';
+  const allLines=text.split('\n');
+  const wrap=document.createElement('div');wrap.className='log-wrap';
+
+  // Toolbar
+  const tb=document.createElement('div');tb.className='log-toolbar';
+  const fi=document.createElement('input');fi.className='log-filter';
+  fi.placeholder='Filter lines… (regex ok)';fi.setAttribute('autocomplete','off');
+  const cnt=document.createElement('span');cnt.style.cssText='font-size:11px;color:var(--mu);font-family:var(--sans);white-space:nowrap';
+
+  let activeLevels=new Set(['ll-error','ll-warn','ll-debug','ll-info','ll-stack']);
+  const lvlDefs=[
+    {id:'ll-error',label:'Error',color:'var(--rd)'},
+    {id:'ll-warn',label:'Warn',color:'var(--yl)'},
+    {id:'ll-debug',label:'Debug',color:'var(--mu)'},
+    {id:'ll-info',label:'Info',color:'var(--tx)'},
+  ];
+  const lvlBtns={};
+  const btnRow=document.createElement('div');btnRow.className='log-lvl-btns';
+  for(const{id,label,color}of lvlDefs){
+    const b=document.createElement('button');b.className='log-lvl act';
+    b.style.color=color;b.textContent=label;
+    b.addEventListener('click',()=>{
+      activeLevels.has(id)?activeLevels.delete(id):activeLevels.add(id);
+      b.classList.toggle('act',activeLevels.has(id));
+      render();
+    });
+    lvlBtns[id]=b;btnRow.appendChild(b);
+  }
+  tb.appendChild(fi);tb.appendChild(btnRow);tb.appendChild(cnt);
+  wrap.appendChild(tb);
+
+  // Body
+  const body=document.createElement('div');body.className='log-body';
+  wrap.appendChild(body);
+
+  let filterRe=null;
+  const renderLines=()=>{
+    body.innerHTML='';
+    let shown=0;
+    for(let i=0;i<allLines.length;i++){
+      const line=allLines[i];
+      const cls=classifyLine(line);
+      if(!activeLevels.has(cls)&&!activeLevels.has('ll-stack'))continue;
+      if(filterRe&&!filterRe.test(line))continue;
+      const row=document.createElement('div');row.className='log-line '+cls;
+      const ln=document.createElement('span');ln.className='log-ln';ln.textContent=i+1;
+      const txt=document.createElement('span');txt.className='log-txt';
+      if(filterRe){
+        txt.innerHTML=esc(line).replace(new RegExp(filterRe.source,'gi'),m=>`<mark style="background:rgba(229,121,26,.3);border-radius:2px">${m}</mark>`);
+      } else {
+        txt.textContent=line;
+      }
+      row.appendChild(ln);row.appendChild(txt);
+      body.appendChild(row);shown++;
+      if(shown>5000){
+        const m=document.createElement('div');m.style.cssText='padding:8px;color:var(--mu);font-family:var(--sans)';
+        m.textContent=`… ${allLines.length-i-1} more lines (use filter to narrow down)`;
+        body.appendChild(m);break;
+      }
+    }
+    cnt.textContent=`${shown} / ${allLines.length} lines`;
+  };
+
+  let ftimer=null;
+  fi.addEventListener('input',()=>{
+    clearTimeout(ftimer);ftimer=setTimeout(()=>{
+      try{filterRe=fi.value?new RegExp(fi.value,'i'):null}catch{filterRe=null}
+      renderLines();
+    },200);
+  });
+
+  renderLines();
+  return wrap;
+}
+
+// ══════════════════════════════════════════════════
 const RPGMV_MAGIC=[0x52,0x50,0x47,0x4D,0x56];
 const PNG_SIG16=new Uint8Array([0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0x00,0x00,0x00,0x0D,0x49,0x48,0x44,0x52]);
 function isRpgmv(b){return b.length>32&&RPGMV_MAGIC.every((v,i)=>b[i]===v)}
@@ -1810,6 +2196,12 @@ function renderContent(){
   const af=App.files.find(f=>f.id===App.tab);
   if(!af){va.appendChild(buildWelcome());return}
 
+  // ES3 encrypted → unlock panel
+  if(af.format==='es3'){va.appendChild(buildES3Panel(af));return}
+
+  // Plain text / log viewer
+  if(af.format==='log'||af.format==='text'){va.appendChild(buildLogView(af));return}
+
   if(af.format==='binary'){va.appendChild(buildHexView(af.data instanceof Uint8Array?af.data:new Uint8Array(af.raw||new ArrayBuffer(0))));return}
 
   const data=typeof af.data==='object'&&af.data?filterByCat(af.data,af.cat,af.cats||CATS_GEN):af.data;
@@ -1889,7 +2281,7 @@ async function loadFiles(files){
   for(const f of files){
     const parsed=await parseFile(f);
     const id=++uid;
-    App.files.push({id,name:f.name,ext:f.name.split('.').pop().toLowerCase(),format:parsed.format,data:parsed.data,raw:parsed.raw,encoder:parsed.encoder,modified:false,cats:detectCats(parsed.data),cat:'all',undoStack:[],redoStack:[]});
+    App.files.push({id,name:f.name,ext:f.name.split('.').pop().toLowerCase(),format:parsed.format,data:parsed.data,raw:parsed.raw,encoder:parsed.encoder,buf:parsed.buf||null,modified:false,cats:detectCats(parsed.data),cat:'all',undoStack:[],redoStack:[]});
     if(!App.tab)App.tab=id;
   }
   render();toast(`Loaded ${files.length} file${files.length!==1?'s':''}`);
