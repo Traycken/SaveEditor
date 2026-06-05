@@ -36,7 +36,81 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 
 /* ── TABS ── */
 #tabs{background:var(--s1);border-bottom:2px solid var(--b0);display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none}
-#tabs::-webkit-scrollbar{display:none}
+#tabs
+/* ══ GALLERY ══════════════════════════════════════════════════ */
+.gal-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.gal-toolbar{display:flex;gap:8px;align-items:center;padding:7px 10px;
+  border-bottom:1px solid var(--b0);background:var(--s1);flex-wrap:wrap;flex-shrink:0}
+.gal-key-row{display:flex;align-items:center;gap:6px}
+.gal-key-lbl{font-size:11px;color:var(--mu);font-family:var(--sans);white-space:nowrap}
+.gal-key-inp{background:var(--s2);border:1px solid var(--b0);color:var(--tx);
+  padding:3px 8px;border-radius:var(--r);font-family:var(--mono);font-size:11px;
+  outline:none;width:240px;letter-spacing:.04em}
+.gal-key-inp:focus{border-color:var(--ca)}
+.gal-key-ok{background:rgba(61,207,122,.1);border:1px solid rgba(61,207,122,.3);
+  color:var(--gr);padding:2px 7px;border-radius:var(--r);font-size:11px;font-family:var(--sans)}
+.gal-count{font-size:11px;color:var(--mu);font-family:var(--sans);white-space:nowrap}
+.gal-sel{background:var(--s2);border:1px solid var(--b0);color:var(--tx);
+  padding:3px 7px;border-radius:var(--r);font-family:var(--sans);font-size:11px;
+  outline:none;cursor:pointer}
+.gal-body{overflow:auto;flex:1;padding:10px}
+.gal-grid{display:grid;gap:8px}
+.gal-grid.gz-xs  {grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}
+.gal-grid.gz-s   {grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+.gal-grid.gz-m   {grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+.gal-grid.gz-l   {grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.gal-grid.gz-xl  {grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.gal-item{background:var(--s2);border:1px solid var(--b0);border-radius:var(--r);
+  overflow:hidden;cursor:pointer;transition:.15s;display:flex;flex-direction:column;
+  position:relative}
+.gal-item:hover{border-color:var(--ca);transform:translateY(-1px);
+  box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.gal-item.selected{border-color:var(--ca);outline:2px solid rgba(229,121,26,.4)}
+.gal-thumb-wrap{width:100%;aspect-ratio:1;background:repeating-conic-gradient(
+  var(--s3) 0% 25%, var(--s2) 0% 50%) 0 0/16px 16px;overflow:hidden;display:flex;
+  align-items:center;justify-content:center}
+.gal-thumb{width:100%;height:100%;object-fit:contain;display:block}
+.gal-info{padding:5px 7px;border-top:1px solid var(--b0);background:rgba(7,16,27,.5)}
+.gal-iname{font-size:10px;color:var(--hi);font-family:var(--sans);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.gal-isize{font-size:9px;color:var(--mu);font-family:var(--sans);margin-top:1px}
+.gal-err{font-size:10px;color:var(--rd);font-family:var(--sans);padding:4px}
+.gal-loading{display:flex;align-items:center;justify-content:center;height:100%;
+  color:var(--mu);font-family:var(--sans);font-size:13px;gap:8px}
+.gal-empty{padding:40px;color:var(--mu);font-family:var(--sans);text-align:center;
+  line-height:2}
+/* Lightbox */
+#gal-lb{position:fixed;inset:0;z-index:9995;display:none;
+  align-items:center;justify-content:center}
+#gal-lb.show{display:flex}
+.gal-lb-bg{position:absolute;inset:0;background:rgba(5,10,18,.94);cursor:pointer}
+.gal-lb-box{position:relative;z-index:1;background:var(--s1);border:1px solid var(--b1);
+  border-radius:8px;padding:14px;max-width:92vw;max-height:93vh;display:flex;
+  flex-direction:column;align-items:center;gap:10px;overflow:hidden}
+.gal-lb-hdr{display:flex;align-items:center;width:100%;gap:10px}
+.gal-lb-fname{font-size:12px;color:var(--tx);font-family:var(--sans);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.gal-lb-close{background:none;border:none;color:var(--mu);cursor:pointer;
+  font-size:16px;padding:2px 6px;border-radius:3px;font-family:var(--mono)}
+.gal-lb-close:hover{color:var(--rd);background:rgba(255,80,96,.12)}
+.gal-lb-imgwrap{flex:1;overflow:hidden;display:flex;align-items:center;
+  justify-content:center;background:repeating-conic-gradient(
+  var(--s2) 0% 25%, var(--s3) 0% 50%) 0 0/20px 20px;border-radius:4px;
+  min-height:200px;min-width:300px}
+.gal-lb-img{max-width:85vw;max-height:78vh;object-fit:contain;display:block;
+  image-rendering:pixelated}
+.gal-lb-img.smooth{image-rendering:auto}
+.gal-lb-meta{font-size:11px;color:var(--mu);font-family:var(--sans);
+  text-align:center;line-height:1.6}
+.gal-lb-foot{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
+.gal-nav{position:fixed;top:50%;transform:translateY(-50%);
+  background:rgba(12,23,38,.85);border:1px solid var(--b1);color:var(--tx);
+  cursor:pointer;font-size:20px;padding:10px 14px;border-radius:var(--r);
+  transition:.1s;z-index:9996;user-select:none}
+.gal-nav:hover{border-color:var(--ca);color:var(--cb)}
+.gal-nav.prev{left:10px}
+.gal-nav.next{right:10px}
+::-webkit-scrollbar{display:none}
 .tab{display:flex;align-items:center;gap:5px;padding:0 11px;cursor:pointer;border-right:1px solid var(--b0);white-space:nowrap;color:var(--mu);font-size:12px;transition:.1s;position:relative;min-width:0;max-width:180px}
 .tab:hover{color:var(--tx);background:var(--s2)}
 .tab.act{color:var(--cb);background:var(--bg)}
@@ -288,6 +362,80 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 .diff-badge.add{background:rgba(61,207,122,.15);color:var(--gr);border:1px solid rgba(61,207,122,.3)}
 
 /* ── SCROLLBARS ── */
+
+/* ══ GALLERY ══════════════════════════════════════════════════ */
+.gal-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.gal-toolbar{display:flex;gap:8px;align-items:center;padding:7px 10px;
+  border-bottom:1px solid var(--b0);background:var(--s1);flex-wrap:wrap;flex-shrink:0}
+.gal-key-row{display:flex;align-items:center;gap:6px}
+.gal-key-lbl{font-size:11px;color:var(--mu);font-family:var(--sans);white-space:nowrap}
+.gal-key-inp{background:var(--s2);border:1px solid var(--b0);color:var(--tx);
+  padding:3px 8px;border-radius:var(--r);font-family:var(--mono);font-size:11px;
+  outline:none;width:240px;letter-spacing:.04em}
+.gal-key-inp:focus{border-color:var(--ca)}
+.gal-key-ok{background:rgba(61,207,122,.1);border:1px solid rgba(61,207,122,.3);
+  color:var(--gr);padding:2px 7px;border-radius:var(--r);font-size:11px;font-family:var(--sans)}
+.gal-count{font-size:11px;color:var(--mu);font-family:var(--sans);white-space:nowrap}
+.gal-sel{background:var(--s2);border:1px solid var(--b0);color:var(--tx);
+  padding:3px 7px;border-radius:var(--r);font-family:var(--sans);font-size:11px;
+  outline:none;cursor:pointer}
+.gal-body{overflow:auto;flex:1;padding:10px}
+.gal-grid{display:grid;gap:8px}
+.gal-grid.gz-xs  {grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}
+.gal-grid.gz-s   {grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+.gal-grid.gz-m   {grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+.gal-grid.gz-l   {grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.gal-grid.gz-xl  {grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.gal-item{background:var(--s2);border:1px solid var(--b0);border-radius:var(--r);
+  overflow:hidden;cursor:pointer;transition:.15s;display:flex;flex-direction:column;
+  position:relative}
+.gal-item:hover{border-color:var(--ca);transform:translateY(-1px);
+  box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.gal-item.selected{border-color:var(--ca);outline:2px solid rgba(229,121,26,.4)}
+.gal-thumb-wrap{width:100%;aspect-ratio:1;background:repeating-conic-gradient(
+  var(--s3) 0% 25%, var(--s2) 0% 50%) 0 0/16px 16px;overflow:hidden;display:flex;
+  align-items:center;justify-content:center}
+.gal-thumb{width:100%;height:100%;object-fit:contain;display:block}
+.gal-info{padding:5px 7px;border-top:1px solid var(--b0);background:rgba(7,16,27,.5)}
+.gal-iname{font-size:10px;color:var(--hi);font-family:var(--sans);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.gal-isize{font-size:9px;color:var(--mu);font-family:var(--sans);margin-top:1px}
+.gal-err{font-size:10px;color:var(--rd);font-family:var(--sans);padding:4px}
+.gal-loading{display:flex;align-items:center;justify-content:center;height:100%;
+  color:var(--mu);font-family:var(--sans);font-size:13px;gap:8px}
+.gal-empty{padding:40px;color:var(--mu);font-family:var(--sans);text-align:center;
+  line-height:2}
+/* Lightbox */
+#gal-lb{position:fixed;inset:0;z-index:9995;display:none;
+  align-items:center;justify-content:center}
+#gal-lb.show{display:flex}
+.gal-lb-bg{position:absolute;inset:0;background:rgba(5,10,18,.94);cursor:pointer}
+.gal-lb-box{position:relative;z-index:1;background:var(--s1);border:1px solid var(--b1);
+  border-radius:8px;padding:14px;max-width:92vw;max-height:93vh;display:flex;
+  flex-direction:column;align-items:center;gap:10px;overflow:hidden}
+.gal-lb-hdr{display:flex;align-items:center;width:100%;gap:10px}
+.gal-lb-fname{font-size:12px;color:var(--tx);font-family:var(--sans);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.gal-lb-close{background:none;border:none;color:var(--mu);cursor:pointer;
+  font-size:16px;padding:2px 6px;border-radius:3px;font-family:var(--mono)}
+.gal-lb-close:hover{color:var(--rd);background:rgba(255,80,96,.12)}
+.gal-lb-imgwrap{flex:1;overflow:hidden;display:flex;align-items:center;
+  justify-content:center;background:repeating-conic-gradient(
+  var(--s2) 0% 25%, var(--s3) 0% 50%) 0 0/20px 20px;border-radius:4px;
+  min-height:200px;min-width:300px}
+.gal-lb-img{max-width:85vw;max-height:78vh;object-fit:contain;display:block;
+  image-rendering:pixelated}
+.gal-lb-img.smooth{image-rendering:auto}
+.gal-lb-meta{font-size:11px;color:var(--mu);font-family:var(--sans);
+  text-align:center;line-height:1.6}
+.gal-lb-foot{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
+.gal-nav{position:fixed;top:50%;transform:translateY(-50%);
+  background:rgba(12,23,38,.85);border:1px solid var(--b1);color:var(--tx);
+  cursor:pointer;font-size:20px;padding:10px 14px;border-radius:var(--r);
+  transition:.1s;z-index:9996;user-select:none}
+.gal-nav:hover{border-color:var(--ca);color:var(--cb)}
+.gal-nav.prev{left:10px}
+.gal-nav.next{right:10px}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--s1)}
 ::-webkit-scrollbar-thumb{background:var(--b1);border-radius:3px}
@@ -325,6 +473,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
   <button id="jtp-cls">✕</button>
 </div>
 
+<div id="gal-lb"><div class="gal-lb-bg"></div></div>
 <div id="dov"><i class="ti ti-folder-open"></i><div>Drop files to load</div></div>
 <div id="ctx"></div>
 <div id="toast"></div>
@@ -349,6 +498,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
     <input type="file" id="fi" multiple accept=".rpgsave,.rmmzsave,.rvdata,.rvdata2,.rxdata,.json,.nson,.dat,.data,.sav,.save" hidden>
     <button class="hbtn" id="fnr-btn" title="Find &amp; Replace (Ctrl+H)"><i class="ti ti-replace"></i></button>
     <button class="hbtn" id="jtp-btn" title="Jump to path (Ctrl+G)"><i class="ti ti-arrow-right"></i></button>
+    <input type="file" id="gfi" multiple accept=".rpgmvp,.png_" hidden>
+    <button class="hbtn" id="gal-btn" title="Load RPGMVP images"><i class="ti ti-photo"></i> Images</button>
     <button class="hbtn" id="paste-btn"><i class="ti ti-clipboard"></i> Paste</button>
     <button class="hbtn" id="lb"><i class="ti ti-folder-open"></i> Load</button>
     <button class="hbtn" id="undo-btn" disabled title="Undo (Ctrl+Z)"><i class="ti ti-arrow-back-up"></i></button>
@@ -392,7 +543,8 @@ const App = {
   search: '',
   viewMode: 'tree',
   searchOpts: { matchCase: false, wholeWord: false, regex: false },
-  cmpOpts: { hideNull: true, numbersOnly: false, pathFilter: '', showDelta: true, groupBy: false, sortCol: -1, sortDir: 1 }
+  cmpOpts: { hideNull: true, numbersOnly: false, pathFilter: '', showDelta: true, groupBy: false, sortCol: -1, sortDir: 1 },
+  gallery: { images: [], detectedKey: null, keyHex: '', sort: 'name', zoom: 'gz-m', lb: null }
 };
 let uid = 0;
 
@@ -1073,6 +1225,164 @@ function collapseAll(container){
 }
 
 // ═══════════════════════════════════════════════════
+// GALLERY — RPGMVP DECRYPT & DISPLAY
+// ═══════════════════════════════════════════════════
+const RPGMV_MAGIC=[0x52,0x50,0x47,0x4D,0x56];
+const PNG_SIG16=new Uint8Array([0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,0x00,0x00,0x00,0x0D,0x49,0x48,0x44,0x52]);
+function isRpgmv(b){return b.length>32&&RPGMV_MAGIC.every((v,i)=>b[i]===v)}
+function galKeyHex(k){return Array.from(k).map(b=>b.toString(16).padStart(2,'0')).join('')}
+function galHexToKey(hex){
+  const h=hex.replace(/\s/g,'');if(h.length!==32)return null;
+  const k=new Uint8Array(16);for(let i=0;i<16;i++)k[i]=parseInt(h.slice(i*2,i*2+2),16);
+  return isNaN(k[0])?null:k;
+}
+function detectGalKey(bytes){const k=new Uint8Array(16);for(let i=0;i<16;i++)k[i]=bytes[16+i]^PNG_SIG16[i];return k}
+function decryptRpgmvp(bytes,key){
+  if(bytes.length<32)return null;
+  const out=new Uint8Array(bytes.length-16);
+  for(let i=0;i<16;i++)out[i]=bytes[16+i]^key[i];
+  out.set(bytes.slice(32),16);return out;
+}
+async function loadGalleryFiles(files){
+  const imgs=files.filter(f=>/\.(rpgmvp|png_)$/i.test(f.name));
+  if(!imgs.length)return false;
+  let added=0;
+  for(const f of imgs){
+    const buf=await readBuf(f);const bytes=new Uint8Array(buf);
+    let png=null;
+    if(isRpgmv(bytes)){
+      if(!App.gallery.detectedKey){App.gallery.detectedKey=detectGalKey(bytes);App.gallery.keyHex=galKeyHex(App.gallery.detectedKey)}
+      png=decryptRpgmvp(bytes,App.gallery.detectedKey);
+    }else if(bytes[0]===0x89&&bytes[1]===0x50){png=bytes}
+    if(!png)continue;
+    const url=URL.createObjectURL(new Blob([png],{type:'image/png'}));
+    App.gallery.images.push({id:++uid,name:f.name,blobUrl:url,bytes,size:f.size,encrypted:isRpgmv(bytes)});
+    added++;
+  }
+  if(added>0){App.tab='gallery';render();toast(`Gallery: ${added} image${added!==1?'s':''} loaded`)}
+  return added>0;
+}
+function reDecryptAll(){
+  const key=App.gallery.detectedKey;
+  for(const img of App.gallery.images){
+    if(!img.encrypted||!img.bytes)continue;
+    const dec=decryptRpgmvp(img.bytes,key);if(!dec)continue;
+    URL.revokeObjectURL(img.blobUrl);
+    img.blobUrl=URL.createObjectURL(new Blob([dec],{type:'image/png'}));
+  }
+  renderContent();
+}
+function buildGalleryView(){
+  const G=App.gallery;
+  const wrap=document.createElement('div');wrap.className='gal-wrap';
+  if(!G.images.length){
+    const em=document.createElement('div');em.className='gal-empty';
+    em.innerHTML='<i class="ti ti-photo" style="font-size:32px;display:block;margin-bottom:12px;color:var(--mu)"></i>No RPGMVP images loaded.<br>Click <b>Images</b> in the header or drag &amp; drop .rpgmvp files.';
+    wrap.appendChild(em);return wrap;
+  }
+  // Toolbar
+  const tb=document.createElement('div');tb.className='gal-toolbar';
+  const kr=document.createElement('div');kr.className='gal-key-row';
+  const kl=document.createElement('span');kl.className='gal-key-lbl';kl.textContent='Key:';
+  const ki=document.createElement('input');ki.className='gal-key-inp';ki.value=G.keyHex;
+  ki.spellcheck=false;ki.placeholder='32-char hex key (auto-detected)';
+  ki.addEventListener('keydown',e=>{if(e.key==='Enter'){
+    const k=galHexToKey(ki.value);
+    if(k){App.gallery.detectedKey=k;App.gallery.keyHex=galKeyHex(k);reDecryptAll();toast('Key applied')}
+    else toast('Invalid key — need 32 hex chars');
+  }});
+  const kb=document.createElement('span');kb.className='gal-key-ok';
+  kb.textContent=G.detectedKey?'auto':'manual';
+  kr.appendChild(kl);kr.appendChild(ki);kr.appendChild(kb);tb.appendChild(kr);
+  const cnt=document.createElement('span');cnt.className='gal-count';
+  cnt.textContent=`${G.images.length} image${G.images.length!==1?'s':''}`;tb.appendChild(cnt);
+  const mkSel=(opts,cur,cb)=>{
+    const s=document.createElement('select');s.className='gal-sel';
+    opts.forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;if(v===cur)o.selected=true;s.appendChild(o)});
+    s.addEventListener('change',()=>cb(s.value));return s;
+  };
+  tb.appendChild(mkSel([['name','Sort: Name'],['rname','Sort: Name ↓'],['size','Sort: Size']],G.sort,v=>{G.sort=v;renderContent()}));
+  tb.appendChild(mkSel([['gz-xs','Tiny (80px)'],['gz-s','Small (120px)'],['gz-m','Medium (170px)'],['gz-l','Large (240px)'],['gz-xl','XLarge (320px)']],G.zoom,v=>{G.zoom=v;renderContent()}));
+  const clrBtn=document.createElement('button');clrBtn.className='hbtn';
+  clrBtn.innerHTML='<i class="ti ti-trash"></i> Clear';
+  clrBtn.addEventListener('click',()=>{
+    G.images.forEach(i=>URL.revokeObjectURL(i.blobUrl));
+    G.images=[];G.detectedKey=null;G.keyHex='';
+    App.tab=App.files.length?App.files[0].id:null;render();
+  });
+  tb.appendChild(clrBtn);
+  wrap.appendChild(tb);
+  // Grid
+  const body=document.createElement('div');body.className='gal-body';
+  const grid=document.createElement('div');grid.className='gal-grid '+G.zoom;
+  const sorted=[...G.images].sort((a,b)=>{
+    if(G.sort==='size')return b.size-a.size;
+    if(G.sort==='rname')return b.name.localeCompare(a.name);
+    return a.name.localeCompare(b.name);
+  });
+  sorted.forEach((img,idx)=>{
+    const item=document.createElement('div');item.className='gal-item';
+    const tw=document.createElement('div');tw.className='gal-thumb-wrap';
+    const th=document.createElement('img');th.className='gal-thumb';th.src=img.blobUrl;
+    th.alt=img.name;th.loading='lazy';tw.appendChild(th);item.appendChild(tw);
+    const info=document.createElement('div');info.className='gal-info';
+    const nm=document.createElement('div');nm.className='gal-iname';
+    nm.textContent=img.name.replace(/\.(rpgmvp|png_)$/i,'');nm.title=img.name;
+    const sz=document.createElement('div');sz.className='gal-isize';
+    sz.textContent=(img.size/1024).toFixed(1)+' KB'+(img.encrypted?' · enc':'');
+    info.appendChild(nm);info.appendChild(sz);item.appendChild(info);
+    item.addEventListener('click',()=>showLightbox(sorted,idx));
+    grid.appendChild(item);
+  });
+  body.appendChild(grid);wrap.appendChild(body);
+  return wrap;
+}
+function showLightbox(sorted,startIdx){
+  let cur=startIdx;
+  const lb=document.getElementById('gal-lb');lb.innerHTML='';
+  const bg=document.createElement('div');bg.className='gal-lb-bg';
+  bg.addEventListener('click',()=>lb.classList.remove('show'));lb.appendChild(bg);
+  const box=document.createElement('div');box.className='gal-lb-box';
+  const hdr=document.createElement('div');hdr.className='gal-lb-hdr';
+  const fnEl=document.createElement('div');fnEl.className='gal-lb-fname';
+  const dlA=document.createElement('a');dlA.className='hbtn';dlA.innerHTML='<i class="ti ti-download"></i> PNG';
+  let smooth=false;
+  const smBtn=document.createElement('button');smBtn.className='hbtn';smBtn.title='Toggle pixel/smooth';
+  smBtn.innerHTML='<i class="ti ti-zoom-scan"></i>';
+  smBtn.addEventListener('click',()=>{smooth=!smooth;imgEl.classList.toggle('smooth',smooth)});
+  const closeBtn=document.createElement('button');closeBtn.className='gal-lb-close';
+  closeBtn.innerHTML='<i class="ti ti-x" style="font-size:14px"></i>';
+  closeBtn.addEventListener('click',()=>lb.classList.remove('show'));
+  hdr.appendChild(fnEl);hdr.appendChild(smBtn);hdr.appendChild(dlA);hdr.appendChild(closeBtn);
+  const iw=document.createElement('div');iw.className='gal-lb-imgwrap';
+  const imgEl=document.createElement('img');imgEl.className='gal-lb-img';iw.appendChild(imgEl);
+  const meta=document.createElement('div');meta.className='gal-lb-meta';
+  const foot=document.createElement('div');foot.className='gal-lb-foot';
+  const prevBtn=document.createElement('button');prevBtn.className='gal-nav prev';prevBtn.textContent='‹';
+  const nextBtn=document.createElement('button');nextBtn.className='gal-nav next';nextBtn.textContent='›';
+  const load=idx=>{
+    cur=((idx%sorted.length)+sorted.length)%sorted.length;
+    const img=sorted[cur];
+    imgEl.src=img.blobUrl;fnEl.textContent=img.name;
+    dlA.href=img.blobUrl;dlA.download=img.name.replace(/\.rpgmvp$/i,'.png');
+    imgEl.onload=()=>meta.textContent=`${imgEl.naturalWidth}×${imgEl.naturalHeight}px · ${(img.size/1024).toFixed(1)} KB · ${cur+1}/${sorted.length}`;
+    meta.textContent='Loading…';
+  };
+  prevBtn.addEventListener('click',e=>{e.stopPropagation();load(cur-1)});
+  nextBtn.addEventListener('click',e=>{e.stopPropagation();load(cur+1)});
+  box.appendChild(hdr);box.appendChild(iw);box.appendChild(meta);
+  lb.appendChild(prevBtn);lb.appendChild(box);lb.appendChild(nextBtn);
+  lb.classList.add('show');load(startIdx);
+}
+document.addEventListener('keydown',e=>{
+  const lb=document.getElementById('gal-lb');
+  if(!lb?.classList.contains('show'))return;
+  if(e.key==='Escape')lb.classList.remove('show');
+  if(e.key==='ArrowLeft')document.querySelector('.gal-nav.prev')?.click();
+  if(e.key==='ArrowRight')document.querySelector('.gal-nav.next')?.click();
+});
+
+// ═══════════════════════════════════════════════════
 // SEARCH
 // ═══════════════════════════════════════════════════
 function buildSearchRe(q, opts){
@@ -1426,7 +1736,7 @@ function updateTabs(){
     const fi=FMT[f.format]||{color:'#4e6080'};
     const dot=document.createElement('span');dot.className='fmt-dot';dot.style.background=fi.color;
     const tn=document.createElement('span');tn.className='tn';tn.textContent=f.name.length>22?f.name.slice(0,19)+'…':f.name;tn.title=f.name;
-    const tx=document.createElement('span');tx.className='tx';tx.title='Close (removes unsaved changes)';tx.innerHTML='<i class="ti ti-x" style="font-size:11px"></i>';
+    const tx=document.createElement('span');tx.className='tx';tx.title='Close';tx.innerHTML='<i class="ti ti-x" style="font-size:11px"></i>';
     tab.appendChild(dot);tab.appendChild(tn);tab.appendChild(tx);
     tab.addEventListener('click',e=>{if(e.target.closest('.tx')){closeFile(f.id);return}App.tab=f.id;render()});
     el.appendChild(tab);
@@ -1438,11 +1748,29 @@ function updateTabs(){
     tab.addEventListener('click',()=>{App.tab='compare';render()});
     el.appendChild(tab);
   }
+  if(App.gallery.images.length>0){
+    const tab=document.createElement('div');
+    tab.className='tab'+(App.tab==='gallery'?' act':'');
+    if(App.tab==='gallery')tab.style.cssText='color:var(--cy)';
+    tab.innerHTML=`<i class="ti ti-photo" style="font-size:13px;color:var(--cy)"></i><span class="tn">Gallery (${App.gallery.images.length})</span>`;
+    tab.addEventListener('click',()=>{App.tab='gallery';render()});
+    el.appendChild(tab);
+  }
 }
 
 function updateSidebar(){
   const sb=document.getElementById('sb');sb.innerHTML='';
   const af=App.files.find(f=>f.id===App.tab);
+  if(App.tab==='gallery'){
+    const s=document.createElement('div');s.className='sb-sect';
+    s.innerHTML=`<div class="sb-hdr">Gallery</div><div class="cat act"><i class="ti ti-photo"></i>Images</div>`;
+    sb.appendChild(s);
+    const info=document.createElement('div');info.className='sb-info';
+    info.innerHTML=`<div>${App.gallery.images.length} image${App.gallery.images.length!==1?'s':''}</div>`
+      +`<div>Formats: RPGMVP/PNG</div>`
+      +(App.gallery.keyHex?`<div style="margin-top:4px;font-size:9px;word-break:break-all;color:var(--mu)">Key:<br>${App.gallery.keyHex}</div>`:'');
+    sb.appendChild(info);return;
+  }
   if(!af||App.tab==='compare'){
     if(App.tab==='compare'){
       const s=document.createElement('div');s.className='sb-sect';
@@ -1476,6 +1804,7 @@ function updateSidebar(){
 
 function renderContent(){
   const va=document.getElementById('va');va.innerHTML='';
+  if(App.tab==='gallery'){va.appendChild(buildGalleryView());return}
   if(!App.files.length){va.appendChild(buildWelcome());return}
   if(App.tab==='compare'){va.appendChild(buildCompareView(App.files));return}
   const af=App.files.find(f=>f.id===App.tab);
@@ -1528,6 +1857,9 @@ function renderContent(){
 
 function updateStatus(){
   const sta=document.getElementById('sta');
+  if(App.tab==='gallery'){
+    sta.innerHTML=`<span class="st-dot ok"></span><span>${App.gallery.images.length} images</span>`+(App.gallery.keyHex?`<span class="st-sep">|</span><span style="color:var(--mu)">Key: ${App.gallery.keyHex.slice(0,8)}…</span>`:'')+`<span style="flex:1"></span><span>← → navigate · Esc close lightbox</span><span class="st-sep">|</span><span>SaveForge v2.2</span>`;return;
+  }
   const af=App.files.find(f=>f.id===App.tab);
   const mods=App.files.filter(f=>f.modified).length;
   sta.innerHTML=`
@@ -1593,6 +1925,8 @@ function exportFile(id){
 // EVENTS
 // ═══════════════════════════════════════════════════
 document.getElementById('fi').addEventListener('change',e=>{loadFiles([...e.target.files]);e.target.value=''});
+document.getElementById('gfi').addEventListener('change',async e=>{await loadGalleryFiles([...e.target.files]);e.target.value=''});
+document.getElementById('gal-btn').addEventListener('click',()=>document.getElementById('gfi').click());
 document.getElementById('lb').addEventListener('click',()=>document.getElementById('fi').click());
 document.getElementById('xb').addEventListener('click',()=>{const af=App.files.find(f=>f.id===App.tab);if(af)exportFile(af.id)});
 document.getElementById('undo-btn').addEventListener('click',()=>{const af=App.files.find(f=>f.id===App.tab);if(af)doUndo(af)});
@@ -1625,9 +1959,13 @@ document.getElementById('paste-ok').addEventListener('click',()=>{
 // Drag & drop
 document.addEventListener('dragover',e=>{e.preventDefault();document.getElementById('dov').classList.add('show')});
 document.addEventListener('dragleave',e=>{if(!e.relatedTarget)document.getElementById('dov').classList.remove('show')});
-document.addEventListener('drop',e=>{
+document.addEventListener('drop',async e=>{
   e.preventDefault();document.getElementById('dov').classList.remove('show');
-  const files=[...e.dataTransfer.files];if(files.length)loadFiles(files);
+  const all=[...e.dataTransfer.files];
+  const imgs=all.filter(f=>/\.(rpgmvp|png_)$/i.test(f.name));
+  const saves=all.filter(f=>!/\.(rpgmvp|png_)$/i.test(f.name));
+  if(imgs.length)await loadGalleryFiles(imgs);
+  if(saves.length)loadFiles(saves);
 });
 
 // Keyboard
