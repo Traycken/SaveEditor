@@ -12,12 +12,14 @@ L'application fonctionne entièrement dans le navigateur, sans installation ni s
 
 Prise en charge de plusieurs formats :
 
-* JSON
-* LZString (RPG Maker MV/MZ)
-* Base64 JSON
-* Ruby Marshal (`.rvdata`, `.rvdata2`, `.rxdata`)
-* Formats binaires génériques
-* Données collées directement depuis le presse-papiers
+*   JSON
+*   LZString (RPG Maker MV/MZ)
+*   Base64 JSON
+*   Ruby Marshal (`.rvdata`, `.rvdata2`, `.rxdata`)
+*   VDF (Valve Data Format)
+*   ES3 (chiffré)
+*   Formats binaires génériques et texte brut
+*   Données collées directement depuis le presse-papiers
 
 Formats acceptés :
 
@@ -33,17 +35,25 @@ Formats acceptés :
 .data
 .sav
 .save
+.es3
+.bak
+.vdf
+.log
+.txt
+.ini
+.cfg
+.csv
 ```
 
 ---
 
 ## 🌳 Exploration des données
 
-* Affichage hiérarchique (Tree View)
-* Affichage plat (Flat View)
-* Navigation rapide dans les structures complexes
-* Dépliage/repliage des branches
-* Statistiques rapides pour les sauvegardes RPG Maker
+*   Affichage hiérarchique (Tree View)
+*   Affichage plat (Flat View)
+*   Navigation rapide dans les structures complexes
+*   Dépliage/repliage des branches
+*   Statistiques rapides pour les sauvegardes RPG Maker
 
 ---
 
@@ -51,26 +61,26 @@ Formats acceptés :
 
 Modification directe des valeurs :
 
-* Nombres
-* Chaînes de caractères
-* Booléens
-* Valeurs nulles
+*   Nombres
+*   Chaînes de caractères
+*   Booléens
+*   Valeurs nulles
 
 Fonctions intégrées :
 
-* Ajout de clés
-* Suppression de clés
-* Incrémentation/Décrémentation rapide
-* Édition contextuelle
+*   Ajout de clés
+*   Suppression de clés
+*   Incrémentation/Décrémentation rapide
+*   Édition contextuelle
 
 ---
 
 ## ↩️ Historique des modifications
 
-* Undo (Ctrl + Z)
-* Redo (Ctrl + Y)
-* Historique des changements
-* Indication visuelle des fichiers modifiés
+*   Undo (Ctrl + Z)
+*   Redo (Ctrl + Y)
+*   Historique des changements
+*   Indication visuelle des fichiers modifiés
 
 ---
 
@@ -78,14 +88,14 @@ Fonctions intégrées :
 
 Recherche dans :
 
-* Les clés
-* Les valeurs
+*   Les clés
+*   Les valeurs
 
 Options disponibles :
 
-* Respect de la casse
-* Mot entier
-* Expressions régulières (Regex)
+*   Respect de la casse
+*   Mot entier
+*   Expressions régulières (Regex)
 
 ---
 
@@ -93,10 +103,10 @@ Options disponibles :
 
 Recherche et remplacement global :
 
-* Texte simple
-* Expressions régulières
-* Clés et valeurs
-* Types numériques et booléens
+*   Texte simple
+*   Expressions régulières
+*   Clés et valeurs
+*   Types numériques et booléens
 
 Prévisualisation avant application des modifications.
 
@@ -106,11 +116,11 @@ Prévisualisation avant application des modifications.
 
 Comparaison multi-fichiers avec :
 
-* Détection des différences
-* Filtres personnalisés
-* Regroupement par catégories
-* Calcul des écarts numériques (Δ)
-* Export CSV des différences
+*   Détection des différences
+*   Filtres personnalisés
+*   Regroupement par catégories
+*   Calcul des écarts numériques (Δ)
+*   Export CSV des différences
 
 ---
 
@@ -132,24 +142,24 @@ party._gold
 
 Détection automatique des structures RPG Maker MV/MZ :
 
-* System
-* Party
-* Actors
-* Variables
-* Switches
-* Map
-* Player
-* Screen
-* Timer
+*   System
+*   Party
+*   Actors
+*   Variables
+*   Switches
+*   Map
+*   Player
+*   Screen
+*   Timer
 
 Affichage de statistiques utiles :
 
-* Or
-* Nombre de sauvegardes
-* Combats
-* Victoires
-* Position du joueur
-* Niveau et HP des personnages
+*   Or
+*   Nombre de sauvegardes
+*   Combats
+*   Victoires
+*   Position du joueur
+*   Niveau et HP des personnages
 
 ---
 
@@ -159,27 +169,27 @@ Export des sauvegardes modifiées dans leur format d'origine lorsque cela est po
 
 Formats pris en charge :
 
-* JSON
-* LZString
-* Base64 JSON
+*   JSON
+*   LZString
+*   Base64 JSON
 
 ---
 
 ## 🛠️ Technologies utilisées
 
-* HTML5
-* CSS3
-* JavaScript Vanilla
-* LZString
-* Tabler Icons
+*   HTML5
+*   CSS3
+*   JavaScript Vanilla
+*   LZString
+*   Tabler Icons
 
 ---
 
 ## 🚀 Utilisation
 
-1. Ouvrir `index.html` dans un navigateur moderne.
-2. Glisser-déposer une ou plusieurs sauvegardes.
-3. Explorer ou modifier les données.
-4. Exporter les fichiers mis à jour.
+1.  Ouvrir `index.html` dans un navigateur moderne.
+2.  Glisser-déposer une ou plusieurs sauvegardes.
+3.  Explorer ou modifier les données.
+4.  Exporter les fichiers mis à jour.
 
 Aucune installation requise.
