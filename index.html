@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SaveForge</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js" crossorigin="anonymous"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -159,6 +160,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 .gal-nav:hover{border-color:var(--ca);color:var(--cb)}
 .gal-nav.prev{left:10px}
 .gal-nav.next{right:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
 ::-webkit-scrollbar{display:none}
 .tab{display:flex;align-items:center;gap:5px;padding:0 11px;cursor:pointer;border-right:1px solid var(--b0);white-space:nowrap;color:var(--mu);font-size:12px;transition:.1s;position:relative;min-width:0;max-width:180px}
 .tab:hover{color:var(--tx);background:var(--s2)}
@@ -534,6 +536,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 .gal-nav:hover{border-color:var(--ca);color:var(--cb)}
 .gal-nav.prev{left:10px}
 .gal-nav.next{right:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--s1)}
 ::-webkit-scrollbar-thumb{background:var(--b1);border-radius:3px}
@@ -593,11 +596,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
     <div id="logo">SAVE<b>FORGE</b></div>
     <div class="spacer"></div>
     <span class="undo-info" id="undo-info"></span>
-    <input type="file" id="fi" multiple accept=".rpgsave,.rmmzsave,.rvdata,.rvdata2,.rxdata,.json,.nson,.dat,.data,.sav,.save,.es3,.bak,.vdf,.log,.txt,.ini,.cfg,.csv" hidden>
+    <input type="file" id="fi" multiple accept=".rpgsave,.rmmzsave,.rvdata,.rvdata2,.rvdata3,.rxdata,.json,.nson,.dat,.data,.sav,.save,.es3,.bak,.vdf,.log,.txt,.ini,.cfg,.csv,.conf,.opt,.options,.settings,.prefs,.yml,.yaml,.xml,.gam,.game,.fos,.ess,.sol,.plr,.player,.profile,.world,.wld,.map,.state,.progress,.checkpoint,.slot,.slot0,.slot1,.slot2,.slot3,.quicksave,.autosave,.persist,.persistent,.stats,.record,.replay,.rec,.dem,.demo,.bin,.db,.sqlite,.sqlite3,.srm,.eep,.fla,.mcr,.dsv,.psv,.sps,.pcsav,.chr,.hero,.party,.campaign,.mission,.level,.playerdata,.gamedata,.savegame,.gamesave,.profiledata,.account,.storage,.archive,.bundle,.pack,.pak,.cache,.cloudsave,.nhd,.household,.traveldb" hidden>
     <button class="hbtn" id="fnr-btn" title="Find &amp; Replace (Ctrl+H)"><i class="ti ti-replace"></i></button>
     <button class="hbtn" id="jtp-btn" title="Jump to path (Ctrl+G)"><i class="ti ti-arrow-right"></i></button>
-    <input type="file" id="gfi" multiple accept=".rpgmvp,.png_" hidden>
-    <button class="hbtn" id="gal-btn" title="Load RPGMVP images"><i class="ti ti-photo"></i> Images</button>
+    <input type="file" id="gfi" multiple accept=".rpgmvp,.png_,.png,.jpg,.jpeg,.webp,.gif,.bmp,.svg,.avif,.tif,.tiff" hidden>
+    <button class="hbtn" id="gal-btn" title="Load images (RPGMVP, PNG, JPG, WebP, GIF, BMP, SVG…)"><i class="ti ti-photo"></i> Images</button>
     <button class="hbtn" id="paste-btn"><i class="ti ti-clipboard"></i> Paste</button>
     <button class="hbtn" id="lb"><i class="ti ti-folder-open"></i> Load</button>
     <button class="hbtn" id="undo-btn" disabled title="Undo (Ctrl+Z)"><i class="ti ti-arrow-back-up"></i></button>
@@ -712,151 +715,297 @@ const FMT = {
   error:    {label:'Error',         color:'#ff5060',editable:false},
   es3:      {label:'ES3 Encrypted', color:'#ff9057',editable:false},
   es3ok:    {label:'ES3 Decrypted', color:'#ffa640',editable:true },
+  rmmzsave: {label:'RMMZSAVE (MZ)',  color:'#ffa640',editable:true },
+  yaml:     {label:'YAML',          color:'#79c0ff',editable:true },
+  xml:      {label:'XML',           color:'#7ee787',editable:false},
+  ini:      {label:'INI/Config',    color:'#4dd9ff',editable:true },
+  sqlite:   {label:'SQLite DB',     color:'#b07aff',editable:false},
+  sram:     {label:'Console SRAM',  color:'#7d8590',editable:false},
   vdf:      {label:'Valve VDF',     color:'#4dd9ff',editable:true },
   log:      {label:'Text Log',      color:'#7ee787',editable:false},
   text:     {label:'Plain Text',    color:'#7ee787',editable:false},
 
 };
 
-async function parseContent(text, buf) {
-  const t = (text||'').trim();
-  if (t) {
-    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2)}}catch{}
-    if(typeof LZString!=='undefined'){
-      try{const dc=LZString.decompressFromBase64(t);if(dc&&dc.length>2){const d=JSON.parse(dc);return{format:'lzstring',data:d,encoder:d=>LZString.compressToBase64(JSON.stringify(d))}}}catch{}
-    }
-    try{const dc=atob(t);const d=JSON.parse(dc);return{format:'b64json',data:d,encoder:d=>btoa(JSON.stringify(d))}}catch{}
-  }
-  if (buf) {
-    const bytes=new Uint8Array(buf);
-    if(bytes.length>=2&&bytes[0]===0x04&&bytes[1]===0x08){
-      try{const m=new Marshal(buf);return{format:'marshal',data:m.read(),encoder:null,raw:buf}}
-      catch(e){return{format:'error',data:{_error:e.message},encoder:null,raw:buf}}
-    }
-    return{format:'binary',data:bytes,encoder:null,raw:buf};
-  }
-  return{format:'error',data:{_error:'Unknown format'},encoder:null};
+
+// ═══════════════════════════════════════════════════
+// CORE UTILITIES
+// ═══════════════════════════════════════════════════
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function setPath(obj,path,val){
+  if(!path)return;
+  const parts=[];let cur='';
+  for(const c of path){if(c==='.'){if(cur)parts.push(cur);cur=''}else cur+=c}
+  if(cur)parts.push(cur);
+  let o=obj;
+  for(let i=0;i<parts.length-1;i++){if(!o||typeof o!=='object')return;o=o[parts[i]]}
+  if(o&&typeof o==='object')o[parts[parts.length-1]]=val;
 }
 
-// VDF parser
-function parseVDF(text) {
-  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
-  const root = {}, stack = [root];
-  let pk = null;
-  for (const line of lines) {
-    if(line==='{'){
-      if(pk){const o={};stack[stack.length-1][pk]=o;stack.push(o);pk=null}
-    } else if(line==='}'){
-      if(stack.length>1)stack.pop();
-    } else {
-      const m=line.match(/^"([^"]*)"(?:\s+"([^"]*)")?/);
-      if(m){m[2]!==undefined?stack[stack.length-1][m[1]]=m[2]:pk=m[1]}
+function getPath(obj,path){
+  if(!path)return obj;
+  const parts=[];let cur='';
+  for(const c of path){if(c==='.'){if(cur)parts.push(cur);cur=''}else cur+=c}
+  if(cur)parts.push(cur);
+  let o=obj;
+  for(const p of parts){if(o===null||o===undefined)return undefined;o=o[p]}
+  return o;
+}
+
+// ═══════════════════════════════════════════════════
+// UNDO / REDO
+// ═══════════════════════════════════════════════════
+function pushUndo(file,path,oldVal,newVal){
+  if(!file.undoStack)file.undoStack=[];
+  if(!file.redoStack)file.redoStack=[];
+  file.undoStack.push({path,oldVal,newVal});
+  file.redoStack=[];
+  if(file.undoStack.length>100)file.undoStack.shift();
+}
+function doUndo(file){
+  if(!file.undoStack||!file.undoStack.length)return;
+  const e=file.undoStack.pop();
+  if(!file.redoStack)file.redoStack=[];
+  file.redoStack.push(e);
+  if(e.oldVal==='__DELETED__'){
+    // can't restore deleted key simply — skip
+  } else {
+    setPath(file.data,e.path,e.oldVal);
+  }
+  file.modified=true;
+  renderContent();updateTabs();updateStatus();updateUndoBtns();
+}
+function doRedo(file){
+  if(!file.redoStack||!file.redoStack.length)return;
+  const e=file.redoStack.pop();
+  if(!file.undoStack)file.undoStack=[];
+  file.undoStack.push(e);
+  if(e.newVal!=='__DELETED__')setPath(file.data,e.path,e.newVal);
+  file.modified=true;
+  renderContent();updateTabs();updateStatus();updateUndoBtns();
+}
+function updateUndoBtns(){
+  const af=App.files.find(f=>f.id===App.tab);
+  document.getElementById('undo-btn').disabled=!af||!af.undoStack||!af.undoStack.length;
+  document.getElementById('redo-btn').disabled=!af||!af.redoStack||!af.redoStack.length;
+  const info=document.getElementById('undo-info');
+  if(info)info.textContent=af&&af.undoStack&&af.undoStack.length?`${af.undoStack.length} edit${af.undoStack.length!==1?'s':''}`:'' ;
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+let _toastTimer=null;
+function toast(msg,dur=2200){
+  const el=document.getElementById('toast');if(!el)return;
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>el.classList.remove('show'),dur);
+}
+function copyToClipboard(text){
+  navigator.clipboard.writeText(text).then(()=>toast('Copied')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Copied');
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// CONTEXT MENU
+// ═══════════════════════════════════════════════════
+function showCtx(x,y,items){
+  const el=document.getElementById('ctx');el.innerHTML='';
+  for(const item of items){
+    if(item==='sep'){const s=document.createElement('div');s.className='ctx-sep';el.appendChild(s);continue}
+    const d=document.createElement('div');d.className='ctx-item'+(item.danger?' danger':'');
+    d.innerHTML=`<i class="ti ${item.icon}"></i>${esc(item.label)}`;
+    d.addEventListener('click',()=>{hideCtx();item.action()});
+    el.appendChild(d);
+  }
+  el.style.display='block';
+  const r=el.getBoundingClientRect();const W=window.innerWidth,H=window.innerHeight;
+  el.style.left=(x+r.width>W?W-r.width-4:x)+'px';
+  el.style.top=(y+r.height>H?H-r.height-4:y)+'px';
+}
+function hideCtx(){const el=document.getElementById('ctx');if(el)el.style.display='none'}
+document.addEventListener('click',hideCtx);
+
+function treeContextMenu(e,path,value,fileId){
+  e.preventDefault();e.stopPropagation();
+  const af=App.files.find(f=>f.id===fileId);
+  const items=[
+    {icon:'ti-copy',label:'Copy path',action:()=>copyToClipboard(path)},
+    {icon:'ti-clipboard-text',label:'Copy value (JSON)',action:()=>copyToClipboard(JSON.stringify(value))},
+  ];
+  if(typeof value==='object'&&value!==null)
+    items.push({icon:'ti-braces',label:'Copy subtree JSON',action:()=>copyToClipboard(JSON.stringify(value,null,2))});
+  if(af&&af.encoder){
+    items.push('sep');
+    if(typeof value==='number'){
+      items.push({icon:'ti-plus',label:'Increment +1',action:()=>{const o=getPath(af.data,path);const n=(o||0)+1;pushUndo(af,path,o,n);setPath(af.data,path,n);af.modified=true;renderContent();updateTabs();updateStatus();updateUndoBtns()}});
+      items.push({icon:'ti-minus',label:'Decrement −1',action:()=>{const o=getPath(af.data,path);const n=(o||0)-1;pushUndo(af,path,o,n);setPath(af.data,path,n);af.modified=true;renderContent();updateTabs();updateStatus();updateUndoBtns()}});
     }
+    if(typeof value==='object'&&value!==null)
+      items.push({icon:'ti-square-plus',label:Array.isArray(value)?'Add item':'Add key…',action:()=>addKey(fileId,path,Array.isArray(value))});
+    items.push({icon:'ti-eraser',label:'Set to null',action:()=>{const o=getPath(af.data,path);pushUndo(af,path,o,null);setPath(af.data,path,null);af.modified=true;renderContent();updateTabs();updateStatus();updateUndoBtns()},danger:true});
+    items.push({icon:'ti-trash',label:'Delete key',action:()=>deleteKey(fileId,path),danger:true});
+  }
+  showCtx(e.clientX,e.clientY,items);
+}
+
+// ═══════════════════════════════════════════════════
+// TREE VALUE ELEMENTS
+// ═══════════════════════════════════════════════════
+function makeValEl(val){
+  const s=document.createElement('span');
+  if(val===null||val===undefined){s.className='vnl';s.textContent='null'}
+  else if(typeof val==='boolean'){s.className='vb';s.textContent=String(val)}
+  else if(typeof val==='number'){s.className='vn';s.textContent=String(val)}
+  else if(typeof val==='string'){
+    s.className='vs';
+    const p=val.length>120?val.substring(0,120)+`…+${val.length-120}`:val;
+    s.textContent='"'+p+'"';
+    if(val.length>120)s.title=val.substring(0,500);
+  }
+  return s;
+}
+
+function makeEditableVal(val,path,fileId){
+  const af=App.files.find(f=>f.id===fileId);
+  if(!af||!af.encoder)return makeValEl(val);
+  if(typeof val==='boolean'){
+    const wrap=document.createElement('span');
+    const chk=document.createElement('input');chk.type='checkbox';chk.className='val-chk';chk.checked=val;
+    chk.addEventListener('click',e=>{e.stopPropagation();
+      pushUndo(af,path,val,chk.checked);setPath(af.data,path,chk.checked);
+      af.modified=true;updateTabs();updateStatus();updateUndoBtns();
+    });
+    const lbl=document.createElement('span');lbl.className='vb';lbl.textContent=String(val);lbl.style.marginLeft='4px';
+    chk.addEventListener('change',()=>{lbl.textContent=String(chk.checked)});
+    wrap.appendChild(chk);wrap.appendChild(lbl);return wrap;
+  }
+  const el=makeValEl(val);
+  el.classList.add('editable');
+  el.addEventListener('click',e=>{e.stopPropagation();startEdit(el,path,val,fileId)});
+  return el;
+}
+
+function startEdit(el,path,curVal,fileId,onCommit=null){
+  const af=App.files.find(f=>f.id===fileId);if(!af)return;
+  const inp=document.createElement('input');
+  inp.type='text';inp.className='val-edit';
+  inp.value=curVal===null?'null':String(curVal);
+  el.replaceWith(inp);inp.focus();inp.select();
+  const commit=()=>{
+    const raw=inp.value.trim();
+    let nv;
+    if(raw==='null')nv=null;
+    else if(raw==='true')nv=true;
+    else if(raw==='false')nv=false;
+    else if(raw!==''&&!isNaN(raw))nv=Number(raw);
+    else nv=inp.value;
+    if(JSON.stringify(nv)===JSON.stringify(curVal)){
+      inp.replaceWith(makeEditableVal(curVal,path,fileId));
+      if(onCommit)onCommit(false);return;
+    }
+    pushUndo(af,path,curVal,nv);setPath(af.data,path,nv);af.modified=true;
+    inp.replaceWith(makeEditableVal(nv,path,fileId));
+    updateTabs();updateStatus();updateUndoBtns();
+    if(onCommit)onCommit(true);
+  };
+  inp.addEventListener('blur',commit);
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();inp.blur()}
+    if(e.key==='Escape')inp.replaceWith(makeEditableVal(curVal,path,fileId));
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// TREE RENDERER (lazy expand)
+// ═══════════════════════════════════════════════════
+function renderChildren(data,path,container,depth,fileId){
+  const isArr=Array.isArray(data);
+  const entries=isArr?data.map((v,i)=>[String(i),v]):Object.entries(data);
+  const max=Math.min(entries.length,600);
+  for(let i=0;i<max;i++){
+    const[k,v]=entries[i];
+    container.appendChild(makeNode(k,v,path?path+'.'+k:k,depth,fileId,isArr));
+  }
+  if(entries.length>600){
+    const m=document.createElement('div');m.className='tr-row';
+    m.innerHTML=`<span class="tr-tog"></span><span class="vm">… ${entries.length-600} more (use search)</span>`;
+    container.appendChild(m);
+  }
+}
+
+function makeNode(key,value,path,depth,fileId,isIdx){
+  const nd=document.createElement('div');nd.className='tr-nd';
+  const row=document.createElement('div');row.className='tr-row';
+  const tog=document.createElement('span');tog.className='tr-tog';
+  const keyEl=document.createElement('span');keyEl.className=isIdx?'ki':'kn';keyEl.textContent=key;
+  const colon=document.createElement('span');colon.className='kc';colon.textContent=':';
+  row.appendChild(tog);row.appendChild(keyEl);row.appendChild(colon);
+  const isObj=typeof value==='object'&&value!==null;
+  if(isObj){
+    const size=Array.isArray(value)?value.length:Object.keys(value).length;
+    const meta=document.createElement('span');meta.className='vm';
+    meta.textContent=` ${Array.isArray(value)?'['+size+']':'{'+size+'}'}`;
+    row.appendChild(meta);
+    const startClosed=depth>=2||size>50;
+    tog.textContent=startClosed?'▶':'▼';
+    if(startClosed)nd.classList.add('cl');
+    const ch=document.createElement('div');ch.className='tr-ch';
+    let loaded=!startClosed;
+    if(!startClosed)renderChildren(value,path,ch,depth+1,fileId);
+    const toggle=()=>{const closed=nd.classList.toggle('cl');tog.textContent=closed?'▶':'▼';if(!closed&&!loaded){renderChildren(value,path,ch,depth+1,fileId);loaded=true}};
+    tog.addEventListener('click',e=>{e.stopPropagation();toggle()});
+    row.addEventListener('click',e=>{if(e.target!==tog)toggle()});
+    row.addEventListener('contextmenu',e=>treeContextMenu(e,path,value,fileId));
+    nd.appendChild(row);nd.appendChild(ch);
+  } else {
+    tog.textContent=' ';
+    row.appendChild(makeEditableVal(value,path,fileId));
+    row.addEventListener('contextmenu',e=>treeContextMenu(e,path,value,fileId));
+    nd.appendChild(row);
+  }
+  return nd;
+}
+
+function buildTree(data,fileId){
+  const root=document.createElement('div');root.className='tr-root';
+  if(data===null||data===undefined||typeof data!=='object'){const r=document.createElement('div');r.className='tr-row';r.appendChild(makeValEl(data));root.appendChild(r);return root}
+  renderChildren(data,'',root,0,fileId);return root;
+}
+
+function buildFlatView(data,fileId){
+  const root=document.createElement('div');root.className='tr-root';
+  const results=[];
+  (function flat(obj,path,depth){
+    if(depth>15)return;
+    if(typeof obj!=='object'||obj===null){results.push({path,value:obj});return}
+    const entries=Array.isArray(obj)?obj.map((v,i)=>[String(i),v]):Object.entries(obj);
+    for(const[k,v]of entries.slice(0,1000))flat(v,path?path+'.'+k:k,depth+1);
+  })(data,'',0);
+  for(const r of results.slice(0,2000)){
+    const row=document.createElement('div');row.className='tr-row';
+    const tog=document.createElement('span');tog.className='tr-tog';tog.textContent=' ';
+    const pe=document.createElement('span');pe.className='kn';pe.textContent=r.path;
+    const colon=document.createElement('span');colon.className='kc';colon.textContent=':';
+    row.appendChild(tog);row.appendChild(pe);row.appendChild(colon);
+    row.appendChild(makeEditableVal(r.value,r.path,fileId));
+    row.addEventListener('contextmenu',e=>treeContextMenu(e,r.path,r.value,fileId));
+    root.appendChild(row);
   }
   return root;
 }
 
-// ES3 decrypt using Web Crypto API
-async function decryptES3(arrayBuffer, password) {
-  const bytes=new Uint8Array(arrayBuffer), enc=new TextEncoder();
-  const pwdBytes=enc.encode(password);
-
-  async function tryAES(keyBytes, iv, ct) {
-    try {
-      if(ct.length%16!==0)return null;
-      const k=await crypto.subtle.importKey('raw',keyBytes,'AES-CBC',false,['decrypt']);
-      const pt=await crypto.subtle.decrypt({name:'AES-CBC',iv},k,ct);
-      const txt=new TextDecoder('utf-8',{fatal:false}).decode(pt).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').trim();
-      if(txt.startsWith('{')||txt.startsWith('['))return txt;
-      return null;
-    } catch { return null; }
-  }
-
-  async function pbkdf2Key(salt, iters=1000) {
-    const km=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);
-    const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iters,hash:'SHA-1'},km,{name:'AES-CBC',length:128},true,['decrypt']);
-    return new Uint8Array(await crypto.subtle.exportKey('raw',k));
-  }
-
-  // Scheme A: raw password padded to 16B, IV at byte 0
-  const rawKey=new Uint8Array(16); rawKey.set(pwdBytes.slice(0,16));
-  const a=await tryAES(rawKey, bytes.slice(0,16), bytes.slice(16));
-  if(a)return{text:a,scheme:'raw-key'};
-
-  // Scheme B: PBKDF2 with hardcoded salts, IV at byte 0
-  for(const salt of ['Easy Save 3','ES3','EasySave3','unity','save']){
-    const k=await pbkdf2Key(enc.encode(salt)).catch(()=>null);
-    if(!k)continue;
-    const r=await tryAES(k, bytes.slice(0,16), bytes.slice(16));
-    if(r)return{text:r,scheme:'pbkdf2-'+salt};
-  }
-
-  // Scheme C: file-embedded 8B salt + 16B IV + ciphertext
-  if(bytes.length>=40){
-    const k=await pbkdf2Key(bytes.slice(0,8)).catch(()=>null);
-    if(k){const r=await tryAES(k,bytes.slice(8,24),bytes.slice(24));if(r)return{text:r,scheme:'salt8+iv'}}
-  }
-
-  // Scheme D: file-embedded 16B salt + 16B IV + ciphertext (ES3 v3+)
-  if(bytes.length>=48){
-    const k=await pbkdf2Key(bytes.slice(0,16)).catch(()=>null);
-    if(k){const r=await tryAES(k,bytes.slice(16,32),bytes.slice(32));if(r)return{text:r,scheme:'salt16+iv'}}
-  }
-
-  return null;
-}
-
-async function parseFile(file) {
-  const ext=file.name.split('.').pop().toLowerCase();
-  let text='', buf=null;
-  try{text=await readText(file)}catch{}
-  try{buf=await readBuf(file)}catch{}
-
-  // ES3 / BAK → encrypted Unity save
-  if(['es3','bak'].includes(ext)){
-    // Try plain JSON first (unencrypted ES3)
-    try{const d=JSON.parse(text.trim());return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text,buf}}catch{}
-    // Encrypted — return locked format with buffer
-    return{format:'es3',data:{_encrypted:true,_file:file.name,_size:file.size},encoder:null,raw:text,buf};
-  }
-
-  // VDF (Valve Data Format)
-  if(ext==='vdf'){
-    try{const d=parseVDF(text);return{format:'vdf',data:d,encoder:d=>vdfStringify(d),raw:text}}catch{}
-  }
-
-  // Log / plain text
-  if(['log','txt','ini','cfg','csv'].includes(ext)){
-    return{format:'log',data:text,encoder:null,raw:text};
-  }
-
-  const r=await parseContent(text,buf);
-  r.raw=r.raw||text;
-  return r;
-}
-
-// VDF serializer (for editable VDF)
-function vdfStringify(obj, indent=0) {
-  const tab='\t'.repeat(indent);
-  let out='';
-  for(const[k,v]of Object.entries(obj)){
-    if(typeof v==='object'&&v!==null){
-      out+=tab+JSON.stringify(k)+'\n'+tab+'{\n';
-      out+=vdfStringify(v,indent+1);
-      out+=tab+'}\n';
-    } else {
-      out+=tab+JSON.stringify(k)+'\t\t'+JSON.stringify(String(v))+'\n';
-    }
-  }
-  return out;
-}
-
+function expandAll(container){container.querySelectorAll('.tr-nd.cl').forEach(nd=>{nd.classList.remove('cl');const t=nd.querySelector(':scope>.tr-row>.tr-tog');if(t)t.textContent='▼'})}
+function collapseAll(container){container.querySelectorAll('.tr-nd:not(.cl)').forEach(nd=>{nd.classList.add('cl');const t=nd.querySelector(':scope>.tr-row>.tr-tog');if(t)t.textContent='▶'})}
 
 // ═══════════════════════════════════════════════════
 // CATEGORY DETECTION
 // ═══════════════════════════════════════════════════
 const CATS_MZ=[
-  {id:'all',    label:'All',       icon:'ti-circle-dot',    keys:null},
+  {id:'all',    label:'All',       icon:'ti-circle-dot'},
   {id:'system', label:'System',    icon:'ti-settings',      keys:['system']},
   {id:'party',  label:'Party',     icon:'ti-users',         keys:['party']},
   {id:'actors', label:'Actors',    icon:'ti-sword',         keys:['actors']},
@@ -884,40 +1033,32 @@ function filterByCat(data,catId,cats){
 }
 
 // ═══════════════════════════════════════════════════
+// RUBY MARSHAL PARSER
+// ═══════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════
 // QUICK STATS (RPG Maker MZ)
 // ═══════════════════════════════════════════════════
-function buildQuickStats(data, fileId){
+function buildQuickStats(data,fileId){
   const frag=document.createDocumentFragment();
   if(!data||typeof data!=='object')return frag;
   const af=App.files.find(f=>f.id===fileId);
-  const p=data.party||{}, sys=data.system||{}, pl=data.player||{}, mp=data.map||{};
-
-  // ── Editable value element ──────────────────────────────
-  function qsVal(path, raw, opts={}){
-    const{color,fmt,suffix='',ro=false}=opts;
-    const displayed = fmt ? fmt(raw) : (raw!=null ? String(raw) : '—');
-    const el=document.createElement('div');
-    el.className='qs-val';
-    if(color)el.style.color=color;
-    el.textContent=displayed+(suffix&&raw!=null?suffix:'');
+  const p=data.party||{},sys=data.system||{},pl=data.player||{},mp=data.map||{};
+  function qsVal(path,raw,opts={}){
+    const{color,fmt,ro=false}=opts;
+    const displayed=fmt?fmt(raw):(raw!=null?String(raw):'—');
+    const el=document.createElement('div');el.className='qs-val';
+    if(color)el.style.color=color;el.textContent=displayed;
     if(!ro&&af&&af.encoder&&raw!=null){
-      el.classList.add('qs-editable');
-      el.title='Click to edit';
-      el.addEventListener('click',e=>{
-        e.stopPropagation();
-        const inp=document.createElement('input');
-        inp.className='qs-edit-inp';
-        inp.value=String(raw);
-        if(color)inp.style.color=color;
+      el.classList.add('qs-editable');el.title='Click to edit';
+      el.addEventListener('click',e=>{e.stopPropagation();
+        const inp=document.createElement('input');inp.className='qs-edit-inp';
+        inp.value=String(raw);if(color)inp.style.color=color;
         el.replaceWith(inp);inp.focus();inp.select();
         const commit=()=>{
-          const r=inp.value.trim();
-          let nv;
-          if(r==='null')nv=null;
-          else if(r==='true')nv=true;
-          else if(r==='false')nv=false;
-          else if(r!==''&&!isNaN(r))nv=Number(r);
-          else nv=inp.value;
+          const rv=inp.value.trim();let nv;
+          if(rv==='null')nv=null;else if(rv==='true')nv=true;else if(rv==='false')nv=false;
+          else if(rv!==''&&!isNaN(rv))nv=Number(rv);else nv=inp.value;
           if(JSON.stringify(nv)!==JSON.stringify(raw)){
             pushUndo(af,path,raw,nv);setPath(af.data,path,nv);
             af.modified=true;updateTabs();updateStatus();updateUndoBtns();
@@ -925,512 +1066,214 @@ function buildQuickStats(data, fileId){
           renderContent();
         };
         inp.addEventListener('blur',commit);
-        inp.addEventListener('keydown',e=>{
-          if(e.key==='Enter'){e.preventDefault();inp.blur()}
-          if(e.key==='Escape')renderContent();
-        });
+        inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();inp.blur()}if(e.key==='Escape')renderContent()});
       });
     }
     return el;
   }
-
-  // ── Card helper ─────────────────────────────────────────
-  function mkCard(label, valEl){
+  function mkCard(label,valEl){
     const c=document.createElement('div');c.className='qs-card';
     const lbl=document.createElement('div');lbl.className='qs-label';lbl.textContent=label;
-    c.appendChild(lbl);
-    if(typeof valEl==='string'){const d=document.createElement('div');d.className='qs-val';d.textContent=valEl;c.appendChild(d);}
-    else c.appendChild(valEl);
-    return c;
+    c.appendChild(lbl);if(typeof valEl==='string'){const d=document.createElement('div');d.className='qs-val';d.textContent=valEl;c.appendChild(d)}else c.appendChild(valEl);return c;
   }
-
-  // ── Section helper ──────────────────────────────────────
-  function mkSection(title, cards){
+  function mkSect(title,cards){
     const s=document.createElement('div');s.className='qs-section';
-    const t=document.createElement('span');t.className='qs-stitle';t.textContent=title;
-    s.appendChild(t);
-    cards.forEach(c=>{if(c)s.appendChild(c)});
-    return s;
+    const t=document.createElement('span');t.className='qs-stitle';t.textContent=title;s.appendChild(t);
+    cards.forEach(c=>{if(c)s.appendChild(c)});return s;
   }
-
   const panel=document.createElement('div');panel.className='qs-panel';
-
-  // ── Section 1: Party Progress ───────────────────────────
-  const progCards=[];
-  if(p._gold!=null)    progCards.push(mkCard('Gold',    qsVal('party._gold',    p._gold,    {color:'var(--yl)'})));
-  if(p._steps!=null)   progCards.push(mkCard('Steps',   qsVal('party._steps',   p._steps)));
-  if(sys._battleCount!=null) progCards.push(mkCard('Battles', qsVal('system._battleCount', sys._battleCount)));
-  if(sys._winCount!=null)    progCards.push(mkCard('Wins',    qsVal('system._winCount',    sys._winCount,    {color:'var(--gr)'})));
-  if(sys._escapeCount!=null) progCards.push(mkCard('Escapes', qsVal('system._escapeCount', sys._escapeCount, {color:'var(--rd)'})));
-  if(sys._saveCount!=null)   progCards.push(mkCard('Saves',   qsVal('system._saveCount',   sys._saveCount,   {color:'var(--cy)'})));
-  // Play time from frames
+  // Party
+  const prog=[];
+  if(p._gold!=null)prog.push(mkCard('Gold',qsVal('party._gold',p._gold,{color:'var(--yl)'})));
+  if(p._steps!=null)prog.push(mkCard('Steps',qsVal('party._steps',p._steps)));
+  if(sys._battleCount!=null)prog.push(mkCard('Battles',qsVal('system._battleCount',sys._battleCount)));
+  if(sys._winCount!=null)prog.push(mkCard('Wins',qsVal('system._winCount',sys._winCount,{color:'var(--gr)'})));
+  if(sys._escapeCount!=null)prog.push(mkCard('Escapes',qsVal('system._escapeCount',sys._escapeCount,{color:'var(--rd)'})));
+  if(sys._saveCount!=null)prog.push(mkCard('Saves',qsVal('system._saveCount',sys._saveCount,{color:'var(--cy)'})));
   if(sys._framesOnSave!=null){
     const sec=Math.floor(sys._framesOnSave/60);
-    const hms=`${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor(sec%3600/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
-    progCards.push(mkCard('Play Time', qsVal('system._framesOnSave', sys._framesOnSave, {color:'var(--pu)',fmt:()=>hms,ro:false})));
+    const h=`${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor(sec%3600/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+    prog.push(mkCard('Play Time',qsVal('system._framesOnSave',sys._framesOnSave,{color:'var(--pu)',fmt:()=>h})));
   }
-  if(progCards.length)panel.appendChild(mkSection('Party Progress', progCards));
-
-  // ── Section 2: Location & System ───────────────────────
-  const locCards=[];
-  if(mp._mapId!=null)    locCards.push(mkCard('Map ID',   qsVal('map._mapId',    mp._mapId,    {color:'var(--bl)'})));
-  if(pl._x!=null)        locCards.push(mkCard('Pos X',    qsVal('player._x',     pl._x)));
-  if(pl._y!=null)        locCards.push(mkCard('Pos Y',    qsVal('player._y',     pl._y)));
-  const dirMap={2:'↓ South',4:'← West',6:'→ East',8:'↑ North'};
-  if(pl._direction!=null) locCards.push(mkCard('Direction', qsVal('player._direction', pl._direction, {fmt:v=>dirMap[v]||String(v)})));
-  if(sys._bgm?._name)    locCards.push(mkCard('BGM',      qsVal('system._bgm._name', sys._bgm._name, {color:'var(--pu)'})));
-  if(sys._windowTone)    locCards.push(mkCard('Window Tone', qsVal('system._windowTone', JSON.stringify(sys._windowTone), {ro:true,color:'var(--mu)'})));
-  if(locCards.length)panel.appendChild(mkSection('Location & System', locCards));
-
-  // ── Section 3: Inventory ───────────────────────────────
-  const invCards=[];
-  if(p._items!=null){
-    const cnt=Object.keys(p._items||{}).length;
-    invCards.push(mkCard('Items',   qsVal('party._items',   cnt,  {ro:true})));
-  }
-  if(p._weapons!=null){
-    const cnt=Object.keys(p._weapons||{}).length;
-    invCards.push(mkCard('Weapons', qsVal('party._weapons', cnt,  {ro:true})));
-  }
-  if(p._armors!=null){
-    const cnt=Object.keys(p._armors||{}).length;
-    invCards.push(mkCard('Armors',  qsVal('party._armors',  cnt,  {ro:true})));
-  }
-  // Most stacked items (top 3)
-  if(p._items&&typeof p._items==='object'){
-    const top=Object.entries(p._items).sort((a,b)=>b[1]-a[1]).slice(0,3);
-    top.forEach(([id,qty])=>invCards.push(mkCard(`Item #${id}`, qsVal(`party._items.${id}`, qty, {color:'var(--cy)'}))));
-  }
-  if(invCards.length)panel.appendChild(mkSection('Inventory', invCards));
-
-  // ── Section 4: Actors (rich cards) ─────────────────────
-  const actorsData=data.actors?._data;
-  if(actorsData&&Array.isArray(actorsData)){
-    const validActors=actorsData.map((a,i)=>({a,i})).filter(({a})=>a&&typeof a==='object'&&a._name);
-    if(validActors.length){
-      const actRow=document.createElement('div');actRow.className='qs-actors-row';
-
-      for(const{a,i}of validActors.slice(0,8)){
+  if(prog.length)panel.appendChild(mkSect('Party Progress',prog));
+  // Location
+  const loc=[];
+  if(mp._mapId!=null)loc.push(mkCard('Map ID',qsVal('map._mapId',mp._mapId,{color:'var(--bl)'})));
+  if(pl._x!=null)loc.push(mkCard('Pos X',qsVal('player._x',pl._x)));
+  if(pl._y!=null)loc.push(mkCard('Pos Y',qsVal('player._y',pl._y)));
+  const dirs={2:'↓ S',4:'← W',6:'→ E',8:'↑ N'};
+  if(pl._direction!=null)loc.push(mkCard('Dir',qsVal('player._direction',pl._direction,{fmt:v=>dirs[v]||String(v)})));
+  if(sys._bgm?._name)loc.push(mkCard('BGM',qsVal('system._bgm._name',sys._bgm._name,{color:'var(--pu)'})));
+  if(loc.length)panel.appendChild(mkSect('Location',loc));
+  // Inventory
+  const inv=[];
+  if(p._items!=null)inv.push(mkCard('Items',qsVal('party._items',Object.keys(p._items||{}).length,{ro:true})));
+  if(p._weapons!=null)inv.push(mkCard('Weapons',qsVal('party._weapons',Object.keys(p._weapons||{}).length,{ro:true})));
+  if(p._armors!=null)inv.push(mkCard('Armors',qsVal('party._armors',Object.keys(p._armors||{}).length,{ro:true})));
+  if(p._items&&typeof p._items==='object')
+    Object.entries(p._items).sort((a,b)=>b[1]-a[1]).slice(0,3).forEach(([id,qty])=>inv.push(mkCard(`Item #${id}`,qsVal(`party._items.${id}`,qty,{color:'var(--cy)'}))));
+  if(inv.length)panel.appendChild(mkSect('Inventory',inv));
+  // Actors
+  const ad=data.actors?._data;
+  if(ad&&Array.isArray(ad)){
+    const valid=ad.map((a,i)=>({a,i})).filter(({a})=>a&&typeof a==='object'&&a._name);
+    if(valid.length){
+      const row=document.createElement('div');row.className='qs-actors-row';
+      for(const{a,i}of valid.slice(0,8)){
         const bp=`actors._data.${i}`;
         const card=document.createElement('div');card.className='qs-ac';
-
-        // ── Header: Name + Level ──
         const hdr=document.createElement('div');hdr.className='qs-ac-hdr';
-        const nameEl=document.createElement('div');nameEl.className='qs-ac-name';
-        nameEl.title=a._name;nameEl.textContent=a._name;
-        const lvWrap=document.createElement('div');lvWrap.className='qs-ac-lv';
-        lvWrap.appendChild(document.createTextNode('Lv '));
-        lvWrap.appendChild(qsVal(`${bp}._level`,a._level,{color:'var(--mu)'}));
-        hdr.appendChild(nameEl);hdr.appendChild(lvWrap);
-        card.appendChild(hdr);
-
-        // ── HP ──
+        const nm=document.createElement('div');nm.className='qs-ac-name';nm.textContent=a._name;
+        const lv=document.createElement('div');lv.className='qs-ac-lv';
+        lv.appendChild(document.createTextNode('Lv '));lv.appendChild(qsVal(`${bp}._level`,a._level,{color:'var(--mu)'}));
+        hdr.appendChild(nm);hdr.appendChild(lv);card.appendChild(hdr);
         const mhp=a._mhp??a._param?.[0];
         if(a._hp!=null&&mhp){
-          const ratio=Math.max(0,Math.min(1,a._hp/mhp));
-          const hpCol=ratio<0.25?'var(--rd)':ratio<0.5?'var(--yl)':'var(--gr)';
-          const hpRow=document.createElement('div');hpRow.className='qs-ac-stat';
-          const lbl=document.createElement('div');lbl.className='qs-ac-stlbl';lbl.textContent='HP';
+          const r2=Math.max(0,Math.min(1,a._hp/mhp)),hc=r2<0.25?'var(--rd)':r2<0.5?'var(--yl)':'var(--gr)';
+          const sr=document.createElement('div');sr.className='qs-ac-stat';
+          const lb=document.createElement('div');lb.className='qs-ac-stlbl';lb.textContent='HP';
           const nums=document.createElement('div');nums.className='qs-ac-nums';
-          nums.appendChild(qsVal(`${bp}._hp`,a._hp,{color:hpCol}));
-          const sep=document.createElement('span');sep.className='qs-ac-sep';sep.textContent='/';
-          nums.appendChild(sep);
-          nums.appendChild(qsVal(`${bp}._mhp`,mhp,{color:'var(--mu)'}));
-          hpRow.appendChild(lbl);hpRow.appendChild(nums);card.appendChild(hpRow);
+          nums.appendChild(qsVal(`${bp}._hp`,a._hp,{color:hc}));
+          const sp=document.createElement('span');sp.className='qs-ac-sep';sp.textContent='/';
+          nums.appendChild(sp);nums.appendChild(qsVal(`${bp}._mhp`,mhp,{color:'var(--mu)'}));
+          sr.appendChild(lb);sr.appendChild(nums);card.appendChild(sr);
           const bar=document.createElement('div');bar.className='qs-bar';
           const fill=document.createElement('div');fill.className='qs-bar-fill';
-          fill.style.cssText=`width:${Math.round(ratio*100)}%;background:${hpCol}`;
-          bar.appendChild(fill);card.appendChild(bar);
+          fill.style.cssText=`width:${Math.round(r2*100)}%;background:${hc}`;bar.appendChild(fill);card.appendChild(bar);
         }
-
-        // ── MP ──
         const mmp=a._mmp??a._param?.[1];
         if(a._mp!=null&&mmp){
-          const mpRatio=Math.max(0,Math.min(1,a._mp/mmp));
-          const mpRow=document.createElement('div');mpRow.className='qs-ac-stat';
-          const lbl=document.createElement('div');lbl.className='qs-ac-stlbl';lbl.textContent='MP';
+          const r2=Math.max(0,Math.min(1,a._mp/mmp));
+          const sr=document.createElement('div');sr.className='qs-ac-stat';
+          const lb=document.createElement('div');lb.className='qs-ac-stlbl';lb.textContent='MP';
           const nums=document.createElement('div');nums.className='qs-ac-nums';
           nums.appendChild(qsVal(`${bp}._mp`,a._mp,{color:'var(--bl)'}));
-          const sep=document.createElement('span');sep.className='qs-ac-sep';sep.textContent='/';
-          nums.appendChild(sep);
-          nums.appendChild(qsVal(`${bp}._mmp`,mmp,{color:'var(--mu)'}));
-          mpRow.appendChild(lbl);mpRow.appendChild(nums);card.appendChild(mpRow);
+          const sp=document.createElement('span');sp.className='qs-ac-sep';sp.textContent='/';
+          nums.appendChild(sp);nums.appendChild(qsVal(`${bp}._mmp`,mmp,{color:'var(--mu)'}));
+          sr.appendChild(lb);sr.appendChild(nums);card.appendChild(sr);
           const bar=document.createElement('div');bar.className='qs-bar';
           const fill=document.createElement('div');fill.className='qs-bar-fill';
-          fill.style.cssText=`width:${Math.round(mpRatio*100)}%;background:var(--bl);opacity:.7`;
-          bar.appendChild(fill);card.appendChild(bar);
+          fill.style.cssText=`width:${Math.round(r2*100)}%;background:var(--bl);opacity:.7`;bar.appendChild(fill);card.appendChild(bar);
         }
-
-        // ── TP ──
-        if(a._tp!=null){
-          const tpRow=document.createElement('div');tpRow.className='qs-ac-stat';
-          const lbl=document.createElement('div');lbl.className='qs-ac-stlbl';lbl.textContent='TP';
-          const val=qsVal(`${bp}._tp`,a._tp,{color:'var(--cb)'});
-          tpRow.appendChild(lbl);tpRow.appendChild(val);card.appendChild(tpRow);
-        }
-
-        // ── Extra row: EXP + Skills + States ──
-        const extra=document.createElement('div');extra.className='qs-ac-extra';
-
         if(a._exp!=null){
-          const ex=document.createElement('div');ex.className='qs-ac-xitem';
-          const xl=document.createElement('div');xl.className='qs-ac-xlbl';xl.textContent='EXP';
-          const xv=qsVal(`${bp}._exp`,a._exp,{color:'var(--pu)'});
-          ex.appendChild(xl);ex.appendChild(xv);extra.appendChild(ex);
+          const er=document.createElement('div');er.className='qs-ac-stat';
+          const el2=document.createElement('div');el2.className='qs-ac-stlbl';el2.textContent='EXP';
+          er.appendChild(el2);er.appendChild(qsVal(`${bp}._exp`,a._exp,{color:'var(--pu)'}));card.appendChild(er);
         }
-        if(Array.isArray(a._skills)){
-          const ex=document.createElement('div');ex.className='qs-ac-xitem';
-          const xl=document.createElement('div');xl.className='qs-ac-xlbl';xl.textContent='Skills';
-          const xv=document.createElement('div');xv.className='qs-val';
-          xv.style.fontSize='12px';xv.textContent=a._skills.length;
-          ex.appendChild(xl);ex.appendChild(xv);extra.appendChild(ex);
-        }
-        if(Array.isArray(a._equips)){
-          const equipped=a._equips.filter(e=>e&&(e._itemId||e._dataId));
-          const ex=document.createElement('div');ex.className='qs-ac-xitem';
-          const xl=document.createElement('div');xl.className='qs-ac-xlbl';xl.textContent='Equips';
-          const xv=document.createElement('div');xv.className='qs-val';
-          xv.style.fontSize='12px';xv.textContent=`${equipped.length}/${a._equips.length}`;
-          ex.appendChild(xl);ex.appendChild(xv);extra.appendChild(ex);
-        }
-
-        if(extra.children.length)card.appendChild(extra);
-
-        // ── Active States ──
         if(Array.isArray(a._states)&&a._states.length){
           const st=document.createElement('div');st.className='qs-ac-states';
-          st.textContent=`States: [${a._states.slice(0,6).join(', ')}${a._states.length>6?'…':''}]`;
-          card.appendChild(st);
+          st.textContent=`States:[${a._states.slice(0,6).join(',')}]`;card.appendChild(st);
         }
-
-        actRow.appendChild(card);
+        row.appendChild(card);
       }
-      panel.appendChild(actRow);
+      panel.appendChild(row);
     }
   }
-
   if(panel.children.length)frag.appendChild(panel);
   return frag;
 }
 
-// ═══════════════════════════════════════════════════
-// UNDO SYSTEM
-// ═══════════════════════════════════════════════════
-function pushUndo(file, path, oldVal, newVal){
-  if(!file.undoStack)file.undoStack=[];
-  if(!file.redoStack)file.redoStack=[];
-  file.undoStack.push({path,oldVal,newVal});
-  file.redoStack=[];
-  if(file.undoStack.length>100)file.undoStack.shift();
-}
-
-function doUndo(file){
-  if(!file.undoStack||!file.undoStack.length)return;
-  const entry=file.undoStack.pop();
-  if(!file.redoStack)file.redoStack=[];
-  file.redoStack.push(entry);
-  setPath(file.data,entry.path,entry.oldVal);
-  file.modified=true;
-  renderContent();updateTabs();updateStatus();updateUndoBtns();
-}
-function doRedo(file){
-  if(!file.redoStack||!file.redoStack.length)return;
-  const entry=file.redoStack.pop();
-  if(!file.undoStack)file.undoStack=[];
-  file.undoStack.push(entry);
-  setPath(file.data,entry.path,entry.newVal);
-  file.modified=true;
-  renderContent();updateTabs();updateStatus();updateUndoBtns();
-}
-function updateUndoBtns(){
-  const af=App.files.find(f=>f.id===App.tab);
-  const undoBtn=document.getElementById('undo-btn');
-  const redoBtn=document.getElementById('redo-btn');
-  const info=document.getElementById('undo-info');
-  undoBtn.disabled=!af||!af.undoStack||!af.undoStack.length;
-  redoBtn.disabled=!af||!af.redoStack||!af.redoStack.length;
-  info.textContent=af&&af.undoStack&&af.undoStack.length?`${af.undoStack.length} edit${af.undoStack.length!==1?'s':''}`:'' ;
-}
-
-// ═══════════════════════════════════════════════════
-// TREE VALUE HELPERS
-// ═══════════════════════════════════════════════════
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-
-function makeValEl(val){
-  const s=document.createElement('span');
-  if(val===null||val===undefined){s.className='vnl';s.textContent='null'}
-  else if(typeof val==='boolean'){s.className='vb';s.textContent=String(val)}
-  else if(typeof val==='number'){s.className='vn';s.textContent=String(val)}
-  else if(typeof val==='string'){
-    s.className='vs';
-    const p=val.length>120?val.substring(0,120)+`…+${val.length-120}`:val;
-    s.textContent='"'+p+'"';
-    if(val.length>120)s.title=val.substring(0,500);
-  }
-  return s;
-}
-
-function makeEditableVal(val, path, fileId){
-  const af=App.files.find(f=>f.id===fileId);
-  if(!af||!af.encoder){return makeValEl(val)}
-  
-  if(typeof val==='boolean'){
-    // Checkbox for booleans
-    const wrap=document.createElement('span');
-    const chk=document.createElement('input');
-    chk.type='checkbox';chk.className='val-chk';chk.checked=val;
-    chk.addEventListener('click',e=>{e.stopPropagation();
-      pushUndo(af,path,val,chk.checked);
-      setPath(af.data,path,chk.checked);
-      af.modified=true;updateTabs();updateStatus();updateUndoBtns();
-    });
-    const lbl=document.createElement('span');lbl.className='vb';
-    lbl.textContent=String(val);lbl.style.marginLeft='4px';
-    chk.addEventListener('change',()=>{lbl.textContent=String(chk.checked)});
-    wrap.appendChild(chk);wrap.appendChild(lbl);
-    return wrap;
-  }
-  
-  const el=makeValEl(val);
-  el.classList.add('editable');
-  el.addEventListener('click',e=>{e.stopPropagation();startEdit(el,path,val,fileId)});
-  return el;
-}
-
-// ═══════════════════════════════════════════════════
-// INLINE EDIT
-// ═══════════════════════════════════════════════════
-function startEdit(el, path, curVal, fileId, onCommit=null){
-  const af=App.files.find(f=>f.id===fileId);if(!af)return;
-  const inp=document.createElement('input');
-  inp.type='text';inp.className='val-edit';
-  inp.value=curVal===null?'null':String(curVal);
-  el.replaceWith(inp);inp.focus();inp.select();
-
-  const commit=()=>{
-    const raw=inp.value.trim();
-    let newVal;
-    if(raw==='null')newVal=null;
-    else if(raw==='true')newVal=true;
-    else if(raw==='false')newVal=false;
-    else if(raw!==''&&!isNaN(raw))newVal=Number(raw);
-    else newVal=inp.value;
-    if(JSON.stringify(newVal)===JSON.stringify(curVal)){
-      inp.replaceWith(makeEditableVal(curVal,path,fileId));
-      if(onCommit)onCommit(false); return;
+async function parseContent(text, buf) {
+  const t = (text||'').trim();
+  if (t) {
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2)}}catch{}
+    if(typeof LZString!=='undefined'){
+      try{const dc=LZString.decompressFromBase64(t);if(dc&&dc.length>2){const d=JSON.parse(dc);return{format:'lzstring',data:d,encoder:d=>LZString.compressToBase64(JSON.stringify(d))}}}catch{}
     }
-    pushUndo(af,path,curVal,newVal);
-    setPath(af.data,path,newVal);af.modified=true;
-    inp.replaceWith(makeEditableVal(newVal,path,fileId));
-    updateTabs();updateStatus();updateUndoBtns();
-    if(onCommit)onCommit(true);
-  };
-  inp.addEventListener('blur',commit);
-  inp.addEventListener('keydown',e=>{
-    if(e.key==='Enter'){e.preventDefault();inp.blur()}
-    if((e.ctrlKey||e.metaKey)&&e.key==='h'){e.preventDefault();showFnR()}
-    if((e.ctrlKey||e.metaKey)&&e.key==='g'){e.preventDefault();showJtp()}
-    if(e.key==='Escape'){inp.replaceWith(makeEditableVal(curVal,path,fileId))}
-  });
-}
-
-function setPath(obj,path,val){
-  if(!path)return;
-  const parts=[];let cur='';
-  for(const c of path){if(c==='.'){{if(cur)parts.push(cur);cur=''}}else cur+=c}
-  if(cur)parts.push(cur);
-  let o=obj;
-  for(let i=0;i<parts.length-1;i++){if(!o||typeof o!=='object')return;o=o[parts[i]]}
-  if(o&&typeof o==='object')o[parts[parts.length-1]]=val;
-}
-
-function getPath(obj,path){
-  const parts=[];let cur='';
-  for(const c of path){if(c==='.'){{if(cur)parts.push(cur);cur=''}}else cur+=c}
-  if(cur)parts.push(cur);
-  let o=obj;
-  for(const p of parts){if(o===null||o===undefined)return undefined;o=o[p]}
-  return o;
-}
-
-// ═══════════════════════════════════════════════════
-// CONTEXT MENU
-// ═══════════════════════════════════════════════════
-const ctxEl=document.getElementById('ctx');
-function showCtx(x,y,items){
-  ctxEl.innerHTML='';
-  for(const item of items){
-    if(item==='sep'){const s=document.createElement('div');s.className='ctx-sep';ctxEl.appendChild(s);continue}
-    const el=document.createElement('div');el.className='ctx-item'+(item.danger?' danger':'');
-    el.innerHTML=`<i class="ti ${item.icon}"></i>${esc(item.label)}`;
-    el.addEventListener('click',()=>{hideCtx();item.action()});
-    ctxEl.appendChild(el);
+    try{const dc=atob(t);const d=JSON.parse(dc);return{format:'b64json',data:d,encoder:d=>btoa(JSON.stringify(d))}}catch{}
   }
-  // Position
-  ctxEl.style.display='block';
-  const r=ctxEl.getBoundingClientRect();
-  const W=window.innerWidth,H=window.innerHeight;
-  ctxEl.style.left=(x+r.width>W?W-r.width-4:x)+'px';
-  ctxEl.style.top=(y+r.height>H?H-r.height-4:y)+'px';
-}
-function hideCtx(){ctxEl.style.display='none'}
-document.addEventListener('click',hideCtx);
-document.addEventListener('keydown',e=>{if(e.key==='Escape')hideCtx()});
-
-
-function treeContextMenu(e,path,value,fileId){
-  e.preventDefault();e.stopPropagation();
-  const af=App.files.find(f=>f.id===fileId);
-  const items=[
-    {icon:'ti-copy',label:'Copy path',action:()=>copyToClipboard(path)},
-    {icon:'ti-clipboard-text',label:'Copy value (JSON)',action:()=>copyToClipboard(JSON.stringify(value))},
-  ];
-  if(typeof value==='object'&&value!==null){
-    items.push({icon:'ti-braces',label:'Copy subtree JSON',action:()=>copyToClipboard(JSON.stringify(value,null,2))});
-  }
-  if(af&&af.encoder){
-    items.push('sep');
-    if(typeof value==='number'){
-      items.push({icon:'ti-plus',label:'Increment +1',action:()=>{const o=getPath(af.data,path);const n=(o||0)+1;pushUndo(af,path,o,n);setPath(af.data,path,n);af.modified=true;renderContent();updateTabs();updateStatus();updateUndoBtns()}});
-      items.push({icon:'ti-minus',label:'Decrement −1',action:()=>{const o=getPath(af.data,path);const n=(o||0)-1;pushUndo(af,path,o,n);setPath(af.data,path,n);af.modified=true;renderContent();updateTabs();updateStatus();updateUndoBtns()}});
-      items.push('sep');
+  if (buf) {
+    const bytes=new Uint8Array(buf);
+    if(bytes.length>=2&&bytes[0]===0x04&&bytes[1]===0x08){
+      try{const m=new Marshal(buf);return{format:'marshal',data:m.read(),encoder:null,raw:buf}}
+      catch(e){return{format:'error',data:{_error:e.message},encoder:null,raw:buf}}
     }
-    if(typeof value==='object'&&value!==null){
-      items.push({icon:'ti-square-plus',label:Array.isArray(value)?'Add item (null)':'Add key…',action:()=>addKey(fileId,path,Array.isArray(value))});
-      items.push('sep');
+    return{format:'binary',data:bytes,encoder:null,raw:buf};
+  }
+  return{format:'error',data:{_error:'Unknown format'},encoder:null};
+}
+
+// VDF serializer
+function vdfStringify(obj, indent=0) {
+  const tab='\t'.repeat(indent); let out='';
+  for(const[k,v]of Object.entries(obj)){
+    if(typeof v==='object'&&v!==null){
+      out+=tab+JSON.stringify(k)+'\n'+tab+'{\n';
+      out+=vdfStringify(v,indent+1);
+      out+=tab+'}\n';
+    } else {
+      out+=tab+JSON.stringify(k)+'\t\t'+JSON.stringify(String(v))+'\n';
     }
-    items.push({icon:'ti-eraser',label:'Set to null',action:()=>{const o=getPath(af.data,path);pushUndo(af,path,o,null);setPath(af.data,path,null);af.modified=true;renderContent();updateTabs();updateStatus();updateUndoBtns()},danger:true});
-    items.push({icon:'ti-trash',label:'Delete key',action:()=>deleteKey(fileId,path),danger:true});
   }
-  showCtx(e.clientX,e.clientY,items);
-}
-
-
-// ═══════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════
-let toastTimer=null;
-function toast(msg,dur=2000){
-  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),dur);
-}
-function copyToClipboard(text){
-  navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard')).catch(()=>{
-    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Copied');
-  });
+  return out;
 }
 
 // ═══════════════════════════════════════════════════
-// TREE RENDERER (lazy expand)
+// parseFile — extension-aware router
 // ═══════════════════════════════════════════════════
-function renderChildren(data, path, container, depth, fileId){
-  const isArr=Array.isArray(data);
-  const entries=isArr?data.map((v,i)=>[String(i),v]):Object.entries(data);
-  const max=Math.min(entries.length,600);
-  for(let i=0;i<max;i++){
-    const[k,v]=entries[i];
-    container.appendChild(makeNode(k,v,path?path+'.'+k:k,depth,fileId,isArr));
+async function parseFile(file) {
+  const ext=file.name.split('.').pop().toLowerCase();
+  let text='', buf=null;
+  try{text=await readText(file)}catch{}
+  try{buf=await readBuf(file)}catch{}
+  const t=(text||'').trim();
+
+  // ── RMMZSAVE: UTF-8 encoded zlib-compressed JSON (RPG Maker MZ desktop) ──
+  if(ext==='rmmzsave'){
+    // Try LZString first (RPG Maker web/MV style)
+    if(typeof LZString!=='undefined'){
+      try{const dc=LZString.decompressFromBase64(t);if(dc&&dc.length>2){const d=JSON.parse(dc);return{format:'lzstring',data:d,encoder:d=>LZString.compressToBase64(JSON.stringify(d)),raw:text,buf}}}catch{}
+    }
+    // Try plain JSON
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text,buf}}catch{}
+    // RMMZSAVE: bytes were stored as a binary string then UTF-8 encoded on disk
+    if(buf&&typeof pako!=='undefined'){
+      try{
+        const textDec=new TextDecoder('utf-8').decode(buf);
+        const recovered=new Uint8Array(textDec.length);
+        for(let i=0;i<textDec.length;i++)recovered[i]=textDec.charCodeAt(i);
+        const dec=pako.inflate(recovered);
+        const json=new TextDecoder('utf-8').decode(dec);
+        const d=JSON.parse(json);
+        const encoder=d=>{
+          const jb=new TextEncoder().encode(JSON.stringify(d));
+          const comp=pako.deflate(jb,{level:1});
+          let s=''; for(let i=0;i<comp.length;i+=8192)s+=String.fromCharCode(...comp.slice(i,i+8192));
+          return s;
+        };
+        return{format:'rmmzsave',data:d,encoder,raw:text,buf};
+      }catch(e){}
+    }
   }
-  if(entries.length>600){
-    const m=document.createElement('div');m.className='tr-row';
-    m.innerHTML=`<span class="tr-tog"></span><span class="vm">… ${entries.length-600} more entries (use search to find them)</span>`;
-    container.appendChild(m);
+
+  // ── RPGSAVE: LZString or JSON (RPG Maker MV/MZ) ──
+  if(ext==='rpgsave'||ext==='save'){
+    if(typeof LZString!=='undefined'){
+      try{const dc=LZString.decompressFromBase64(t);if(dc&&dc.length>2){const d=JSON.parse(dc);return{format:'lzstring',data:d,encoder:d=>LZString.compressToBase64(JSON.stringify(d)),raw:text,buf}}}catch{}
+    }
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text,buf}}catch{}
   }
-}
 
-function makeNode(key, value, path, depth, fileId, isIdx){
-  const nd=document.createElement('div');nd.className='tr-nd';
-  const row=document.createElement('div');row.className='tr-row';
-
-  const tog=document.createElement('span');tog.className='tr-tog';
-  const keyEl=document.createElement('span');keyEl.className=isIdx?'ki':'kn';keyEl.textContent=key;
-  const colon=document.createElement('span');colon.className='kc';colon.textContent=':';
-  row.appendChild(tog);row.appendChild(keyEl);row.appendChild(colon);
-
-  const isObj=typeof value==='object'&&value!==null;
-
-  if(isObj){
-    const size=Array.isArray(value)?value.length:Object.keys(value).length;
-    const meta=document.createElement('span');meta.className='vm';
-    meta.textContent=value===null?'null':` ${Array.isArray(value)?'['+size+']':'{'+size+'}'}`;
-    row.appendChild(meta);
-    const startClosed=depth>=2||size>50;
-    tog.textContent=startClosed?'▶':'▼';
-    if(startClosed)nd.classList.add('cl');
-
-    const ch=document.createElement('div');ch.className='tr-ch';
-    let loaded=!startClosed;
-    if(!startClosed)renderChildren(value,path,ch,depth+1,fileId);
-
-    const toggle=()=>{
-      const closed=nd.classList.toggle('cl');tog.textContent=closed?'▶':'▼';
-      if(!closed&&!loaded){renderChildren(value,path,ch,depth+1,fileId);loaded=true}
-    };
-    tog.addEventListener('click',e=>{e.stopPropagation();toggle()});
-    row.addEventListener('click',e=>{if(e.target!==tog)toggle()});
-    row.addEventListener('contextmenu',e=>treeContextMenu(e,path,value,fileId));
-    nd.appendChild(row);nd.appendChild(ch);
-  } else {
-    tog.textContent=' ';
-    row.appendChild(makeEditableVal(value,path,fileId));
-    row.addEventListener('contextmenu',e=>treeContextMenu(e,path,value,fileId));
-    nd.appendChild(row);
+  // ── ES3 / BAK: AES-encrypted Unity save ──
+  if(ext==='es3'||ext==='bak'){
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text,buf}}catch{}
+    return{format:'es3',data:{_encrypted:true,_file:file.name,_size:file.size},encoder:null,raw:text,buf};
   }
-  return nd;
-}
 
-function buildTree(data, fileId){
-  const root=document.createElement('div');root.className='tr-root';
-  if(data===null||data===undefined||typeof data!=='object'){const r=document.createElement('div');r.className='tr-row';r.appendChild(makeValEl(data));root.appendChild(r);return root}
-  renderChildren(data,'',root,0,fileId);
-  return root;
-}
-
-function buildFlatView(data, fileId){
-  const root=document.createElement('div');root.className='tr-root';
-  const results=[];
-  (function flatten(obj,path,depth){
-    if(depth>15)return;
-    if(typeof obj!=='object'||obj===null){results.push({path,value:obj});return}
-    const entries=Array.isArray(obj)?obj.map((v,i)=>[String(i),v]):Object.entries(obj);
-    for(const[k,v]of entries.slice(0,1000))flatten(v,path?path+'.'+k:k,depth+1);
-  })(data,'',0);
-
-  for(const r of results.slice(0,2000)){
-    const row=document.createElement('div');row.className='tr-row';
-    const tog=document.createElement('span');tog.className='tr-tog';tog.textContent=' ';
-    const pathEl=document.createElement('span');pathEl.className='kn';pathEl.textContent=r.path;
-    const colon=document.createElement('span');colon.className='kc';colon.textContent=':';
-    row.appendChild(tog);row.appendChild(pathEl);row.appendChild(colon);
-    row.appendChild(makeEditableVal(r.value,r.path,fileId));
-    row.addEventListener('contextmenu',e=>treeContextMenu(e,r.path,r.value,fileId));
-    root.appendChild(row);
+  // ── VDF: Valve Data Format ──
+  if(ext==='vdf'){
+    try{const d=parseVDF(text);return{format:'vdf',data:d,encoder:d=>vdfStringify(d),raw:text}}catch{}
   }
-  if(results.length>2000){
-    const m=document.createElement('div');m.className='tr-row';
-    m.innerHTML=`<span class="tr-tog"></span><span class="vm">… ${results.length-2000} more leaf values — use search to filter</span>`;
-    root.appendChild(m);
-  }
-  return root;
-}
 
-// ═══════════════════════════════════════════════════
-// EXPAND / COLLAPSE ALL
-// ═══════════════════════════════════════════════════
-function expandAll(container){
-  container.querySelectorAll('.tr-nd.cl').forEach(nd=>{
-    nd.classList.remove('cl');
-    const tog=nd.querySelector(':scope > .tr-row > .tr-tog');
-    if(tog)tog.textContent='▼';
-  });
-}
-function collapseAll(container){
-  container.querySelectorAll('.tr-nd:not(.cl)').forEach(nd=>{
-    nd.classList.add('cl');
-    const tog=nd.querySelector(':scope > .tr-row > .tr-tog');
-    if(tog)tog.textContent='▶';
-  });
+  // ── LOG / TEXT ──
+  if(['log','txt','ini','cfg','csv'].includes(ext)){
+    return{format:'log',data:text,encoder:null,raw:text};
+  }
+
+  // ── Fallback: generic content detection ──
+  const r=await parseContent(text,buf);
+  r.raw=r.raw||text; r.buf=r.buf||buf;
+  return r;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1439,84 +1282,502 @@ function collapseAll(container){
 function buildES3Panel(af){
   const wrap=document.createElement('div');wrap.className='es3-panel';
   const card=document.createElement('div');card.className='es3-card';
-
+  const sizeKB=(af.data._size/1024).toFixed(1);
   card.innerHTML=`
-    <div class="es3-hdr"><i class="ti ti-lock"></i>
+    <div class="es3-hdr">
+      <i class="ti ti-lock"></i>
       <div>
-        <div class="es3-title">Easy Save 3 — Encrypted File</div>
+        <div class="es3-title">Easy Save 3 — Encrypted</div>
+        <div style="font-size:11px;color:var(--mu);font-family:var(--sans)">${esc(af.name)} · ${sizeKB} KB · AES-128-CBC</div>
       </div>
-    </div>
-    <div class="es3-sub">
-      This <b>${af.name}</b> (${(af.data._size/1024).toFixed(1)} KB) is AES-128-CBC encrypted.<br>
-      Enter the encryption password set in the game's ES3 settings.
-      The editor will try multiple key-derivation schemes automatically.
     </div>
     <div class="es3-row">
       <input class="es3-inp" id="es3-pwd" type="password" placeholder="Encryption password…" autocomplete="off" spellcheck="false">
       <button class="hbtn p" id="es3-go"><i class="ti ti-lock-open"></i> Decrypt</button>
+      <button class="hbtn" id="es3-dict" title="Try ~200 common passwords"><i class="ti ti-list-search"></i> Dict</button>
     </div>
     <div class="es3-status" id="es3-status"></div>
-    <details class="es3-schemes">
-      <summary>Schemes tried automatically</summary>
-      <ul>
-        <li>Raw password bytes (16B key), IV at byte 0</li>
-        <li>PBKDF2-SHA1 × 1000 with salts: "Easy Save 3", "ES3", "EasySave3"…</li>
-        <li>PBKDF2-SHA1 with file-embedded salt (8B prefix + 16B IV)</li>
-        <li>PBKDF2-SHA1 with file-embedded salt (16B prefix + 16B IV, ES3 v3+)</li>
-      </ul>
+    <details class="es3-schemes" style="margin-top:6px">
+      <summary style="cursor:pointer;font-size:11px;color:var(--mu);font-family:var(--sans)">How to find the password</summary>
+      <div style="font-size:11px;font-family:var(--sans);color:var(--mu);line-height:2;margin-top:8px">
+        <b style="color:var(--tx)">1. Open:</b>
+        <code style="color:var(--cy);font-size:10px">…/TaskBarHero_Data/Managed/Assembly-CSharp.dll</code><br>
+        <b style="color:var(--tx)">2. Use ILSpy, dnSpy or dotPeek (free)</b><br>
+        <b style="color:var(--tx)">3. Search:</b> <code style="color:var(--ca)">ES3Settings</code> or <code style="color:var(--ca)">encryptionPassword</code><br>
+        <b style="color:var(--tx)">4. Paste the string above → Decrypt</b>
+      </div>
     </details>`;
 
   const status=card.querySelector('#es3-status');
   const go=card.querySelector('#es3-go');
+  const dictBtn=card.querySelector('#es3-dict');
   const inp=card.querySelector('#es3-pwd');
+
+  const applyResult=(res,pwd)=>{
+    try{
+      const data=JSON.parse(res.text);
+      af.format='es3ok';af.data=data;af.modified=false;
+      af.encoder=()=>{toast('Re-encryption not supported — exporting JSON');return JSON.stringify(data,null,2)};
+      status.innerHTML=`<span style="color:var(--gr)">✓ Decrypted! Password: <b>${esc(pwd||'(empty)')}</b> · Scheme: ${esc(res.scheme||'')}</span>`;
+      setTimeout(()=>renderContent(),700);
+    }catch(e){
+      status.innerHTML=`<span style="color:var(--rd)">Decrypted but JSON invalid: ${esc(e.message)}</span>`;
+    }
+  };
 
   const attempt=async()=>{
     const pwd=inp.value;
-    status.textContent='Trying decryption…';status.className='es3-status loading';
-    go.disabled=true;
+    status.innerHTML='<span style="color:var(--mu)">Trying all schemes…</span>';
+    go.disabled=true;dictBtn.disabled=true;
+    const res=await decryptES3(af.buf,pwd).catch(e=>null);
+    if(res)applyResult(res,pwd);
+    else status.innerHTML='<span style="color:var(--rd)">Failed — password incorrect or unsupported scheme</span>';
+    go.disabled=false;dictBtn.disabled=false;
+  };
 
-    try{
-      const res=await decryptES3(af.buf, pwd);
-
-      if(res&&res.text){
-        try{
-          const data=JSON.parse(res.text);
-          af.format='es3ok';af.data=data;
-          af.encoder=d=>encryptES3Back(JSON.stringify(d),pwd,af.buf);
-          af.modified=false;
-          status.textContent=`✓ Decrypted! Scheme: ${res.scheme}`;status.className='es3-status ok';
-          setTimeout(()=>renderContent(),600);
-        }catch(e){
-          status.textContent=`Decrypted but JSON parse failed: ${e.message}`;status.className='es3-status err';
-        }
-      } else {
-        status.textContent='Decryption failed — password incorrect or unsupported format';
-        status.className='es3-status err';
-      }
-    }catch(e){
-      status.textContent='Error: '+e.message;status.className='es3-status err';
-    }
-    go.disabled=false;
+  const dictAttack=async()=>{
+    status.innerHTML='<span style="color:var(--mu)">Dictionary: 0/'+ES3_DICT.length+'…</span>';
+    go.disabled=true;dictBtn.disabled=true;
+    const res=await decryptES3WithDict(af.buf,(i,tot,pwd)=>{
+      if(i%10===0)status.innerHTML=`<span style="color:var(--mu)">Dict: ${i}/${tot} — <b>${esc(pwd||'(empty)')}</b></span>`;
+    });
+    if(res){inp.value=res.password||'';applyResult(res,res.password);}
+    else status.innerHTML='<span style="color:var(--rd)">Dict exhausted — use ILSpy to extract password from DLL</span>';
+    go.disabled=false;dictBtn.disabled=false;
   };
 
   go.addEventListener('click',attempt);
+  dictBtn.addEventListener('click',dictAttack);
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')attempt()});
 
-  // Also add file re-read helper: store ArrayBuffer when file loads
-  if(!af.buf&&af.raw){
-    // Try to reconstruct from raw text (if it was read as text, might be corrupted for binary)
-    // Better: store the buf during parseFile
+  // Auto-run dict attack on first display
+  if(!af._autoTried){
+    af._autoTried=true;
+    setTimeout(async()=>{
+      status.innerHTML='<span style="color:var(--mu)">Auto-trying passwords…</span>';
+      go.disabled=true;dictBtn.disabled=true;
+      const res=await decryptES3WithDict(af.buf,(i,tot,p)=>{
+        if(i%20===0)status.innerHTML=`<span style="color:var(--mu)">Auto: ${i}/${tot} — <b>${esc(p||'(empty)')}</b></span>`;
+      });
+      if(res){inp.value=res.password||'';applyResult(res,res.password);}
+      else{
+        status.innerHTML='<span style="color:var(--mu)">Auto-detect failed — enter password manually</span>';
+        go.disabled=false;dictBtn.disabled=false;
+      }
+    },120);
   }
-
   wrap.appendChild(card);
   return wrap;
 }
 
-// Stub re-encryptor (decryption-only for now — re-encryption needs same IV/salt)
-async function encryptES3Back(jsonText, password, origBuf) {
-  // For now: return the original encrypted bytes (re-encryption TBD)
-  toast('Note: re-encryption not yet supported — exporting original encrypted file');
-  return origBuf ? new Uint8Array(origBuf) : new TextEncoder().encode(jsonText);
+
+// ═══════════════════════════════════════════════════
+// NEW FORMAT PARSERS
+// ═══════════════════════════════════════════════════
+
+// ── YAML ──────────────────────────────────────────
+function parseYAMLVal(s){
+  s=s.trim();
+  if(!s||s==='null'||s==='~')return null;
+  if(s==='true'||s==='yes'||s==='on')return true;
+  if(s==='false'||s==='no'||s==='off')return false;
+  if(!isNaN(s)&&s!=='')return Number(s);
+  if((s.startsWith('"')&&s.endsWith('"'))||(s.startsWith("'")&&s.endsWith("'")))return s.slice(1,-1);
+  return s;
+}
+function parseYAML(text){
+  const lines=text.split('\n');
+  const root={};
+  // Stack: {indent, obj, key, isArr}
+  const stk=[{indent:-1,obj:root,key:null,isArr:false}];
+  function top(){return stk[stk.length-1]}
+  function popTo(indent){while(stk.length>1&&top().indent>=indent)stk.pop()}
+  function setVal(key,val,obj){
+    if(Array.isArray(obj))obj.push(val);
+    else obj[key]=val;
+  }
+  for(const raw of lines){
+    if(!raw.trim()||raw.trim().startsWith('#'))continue;
+    const indent=raw.search(/\S/);
+    const line=raw.trim();
+    popTo(indent);
+    const {obj,key}=top();
+    const target=Array.isArray(obj)?obj:obj;
+    if(line.startsWith('- ')){
+      const val=line.slice(2).trim();
+      const cur=key!==null&&!Array.isArray(target[key])?target[key]=[]:key!==null?target[key]:target;
+      if(val.includes(':')&&!val.startsWith('"')&&!val.startsWith("'")){
+        const newObj={};cur.push(newObj);stk.push({indent,obj:newObj,key:null,isArr:true});
+        const ci=val.indexOf(':');const k=val.slice(0,ci).trim();const v=val.slice(ci+1).trim();
+        if(v)newObj[k]=parseYAMLVal(v);else{newObj[k]={};stk.push({indent:indent+2,obj:newObj,key:k,isArr:false})}
+      }else cur.push(parseYAMLVal(val));
+    }else if(line.includes(':')){
+      const ci=line.indexOf(':');const k=line.slice(0,ci).trim().replace(/^["']|["']$/g,'');
+      const v=line.slice(ci+1).trim();
+      const t2=Array.isArray(target)?{}:target;
+      if(Array.isArray(target))target.push(t2);
+      if(!v||v==='|'||v==='>'){t2[k]={};stk.push({indent,obj:t2,key:k,isArr:false})}
+      else if(v.startsWith('[')){try{t2[k]=JSON.parse(v.replace(/'/g,'"'))}catch{t2[k]=v};stk.push({indent,obj:t2,key:k,isArr:false})}
+      else{t2[k]=parseYAMLVal(v);stk.push({indent,obj:t2,key:k,isArr:false})}
+    }
+  }
+  return root;
+}
+function yamlStringify(obj,indent=0){
+  if(obj===null)return'null';
+  if(typeof obj==='boolean'||typeof obj==='number')return String(obj);
+  if(typeof obj==='string'){
+    if(/[\n:#\[\]{},]/.test(obj)||!obj.trim())return JSON.stringify(obj);
+    return obj;
+  }
+  const pad='  '.repeat(indent);
+  if(Array.isArray(obj))return obj.map(v=>{
+    const vs=yamlStringify(v,indent+1);
+    return typeof v==='object'&&v?pad+'- \n'+vs.split('\n').map(l=>pad+'  '+l).join('\n'):pad+'- '+vs;
+  }).join('\n');
+  return Object.entries(obj).map(([k,v])=>{
+    if(typeof v==='object'&&v!==null){
+      if(Array.isArray(v)&&!v.length)return pad+k+': []';
+      return pad+k+':\n'+yamlStringify(v,indent+1);
+    }
+    return pad+k+': '+yamlStringify(v);
+  }).join('\n');
+}
+
+// ── INI / CONFIG ──────────────────────────────────
+function parseINI(text){
+  const result={};let cur=result;
+  for(const raw of text.split('\n')){
+    const line=raw.trim();
+    if(!line||line.startsWith('#')||line.startsWith(';')||line.startsWith('//'))continue;
+    if(line.startsWith('[')&&line.includes(']')){
+      const sec=line.slice(1,line.indexOf(']'));result[sec]={};cur=result[sec];
+    }else{
+      const si=line.includes('=')?line.indexOf('='):line.includes(':')?line.indexOf(':'):-1;
+      if(si<0)continue;
+      const k=line.slice(0,si).trim();
+      const v=line.slice(si+1).split(/\s*[#;]/)[0].trim().replace(/^["']|["']$/g,'');
+      cur[k]=v==='null'?null:v==='true'||v==='yes'?true:v==='false'||v==='no'?false:(!isNaN(v)&&v!=='')?Number(v):v;
+    }
+  }
+  const keys=Object.keys(result);
+  if(keys.length===1&&typeof result[keys[0]]==='object')return result[keys[0]];
+  return result;
+}
+function iniStringify(obj){
+  let out='';const secs={};const root={};
+  for(const[k,v]of Object.entries(obj)){if(typeof v==='object'&&v)secs[k]=v;else root[k]=v}
+  for(const[k,v]of Object.entries(root))out+=`${k}=${v}\n`;
+  for(const[s,vals]of Object.entries(secs)){
+    out+=`\n[${s}]\n`;
+    for(const[k,v]of Object.entries(vals))out+=`${k}=${v}\n`;
+  }
+  return out;
+}
+
+// ── XML ───────────────────────────────────────────
+function parseXML(text){
+  const doc=new DOMParser().parseFromString(text,'text/xml');
+  const err=doc.querySelector('parsererror');
+  if(err)throw new Error(err.textContent.substring(0,120));
+  function n2o(node){
+    const obj={};
+    if(node.attributes)for(const a of node.attributes)obj['@'+a.name]=a.value;
+    const kids=Array.from(node.childNodes);
+    const els=kids.filter(n=>n.nodeType===1);
+    const txt=kids.filter(n=>n.nodeType===3).map(n=>n.textContent.trim()).join('').trim();
+    if(!els.length){if(!Object.keys(obj).length)return txt||null;if(txt)obj['#text']=txt;return obj}
+    if(txt)obj['#text']=txt;
+    for(const c of els){
+      const nm=c.tagName||c.localName;const val=n2o(c);
+      if(nm in obj){if(!Array.isArray(obj[nm]))obj[nm]=[obj[nm]];obj[nm].push(val)}
+      else obj[nm]=val;
+    }
+    return obj;
+  }
+  const r=doc.documentElement;return{[r.tagName]:n2o(r)};
+}
+
+// ── SQLITE ────────────────────────────────────────
+const SQLITE_MAGIC=[83,81,76,105,116,101,32,102,111,114,109,97,116,32,51,0];
+function isSQLite(b){return b.length>=16&&SQLITE_MAGIC.every((v,i)=>b[i]===v)}
+function parseSQLiteHeader(b){
+  const v=new DataView(b.buffer||new Uint8Array(b).buffer);
+  const pg=v.getUint16(16,false);
+  return{_format:'SQLite Database',_pageSize:pg===1?65536:pg,_pageCount:v.getUint32(28,false),
+    _fileSize:b.length,_encoding:b[56]===1?'UTF-8':b[56]===2?'UTF-16LE':'UTF-16BE',
+    _note:'Use DB Browser for SQLite to inspect tables and rows.'};
+}
+
+// ── PSX MEMORY CARD ───────────────────────────────
+function parsePSXMemCard(b){
+  const r={_format:'PSX Memory Card (128 KB)',_note:'15 save blocks of 8 KB each',blocks:[]};
+  for(let i=0;i<15;i++){
+    const h=128+i*128;const s=b[h];
+    const stateMap={0x51:'in_use (first)',0x52:'in_use (middle)',0x53:'in_use (last)',0xA0:'free',0xFF:'corrupted'};
+    r.blocks.push({block:i+1,state:stateMap[s]||`unknown(0x${s.toString(16)})`});
+  }
+  return r;
+}
+
+// ── SNES SRAM / EEPROM ────────────────────────────
+function parseSRAMInfo(bytes,ext){
+  const types={srm:'SNES SRAM',eep:'N64 EEPROM (512B/2KB)',fla:'N64 FlashRAM (128KB)',
+    dsv:'NDS Save',psv:'PS Vita Save',mcr:'PSX Memory Card',sps:'Spectrum Save'};
+  return{_format:types[ext]||'Console Save RAM',_size:bytes.length,_sizeKB:(bytes.length/1024).toFixed(2),
+    _note:'Raw binary save data — structure is game-specific.',
+    _first32bytes:Array.from(bytes.slice(0,32)).map(b=>b.toString(16).padStart(2,'0')).join(' ')};
+}
+
+// ── GENERIC SAVE CHAIN ────────────────────────────
+const GENERIC_EXTS=new Set([
+  'gam','game','savegame','gamesave','gamedata','playerdata','profiledata',
+  'slot','slot0','slot1','slot2','slot3','quicksave','autosave',
+  'fos','plr','player','profile','account','chr','hero',
+  'campaign','mission','level','state','progress','checkpoint',
+  'persist','persistent','storage','cache','cloudsave',
+  'stats','record','replay','rec','dem','demo','world','wld','map',
+  'pack','bundle','archive','sps','pcsav','nhd','household','traveldb',
+  'rvdata3','sol','ess','savegame','pak','bin'
+]);
+const CONSOLE_EXTS=new Set(['srm','eep','fla','mcr','dsv','psv','sps']);
+
+async function tryGenericChain(text,buf,ext){
+  const t=(text||'').trim();
+  if(t){
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text,buf}}catch{}
+    if(typeof LZString!=='undefined'){
+      try{const dc=LZString.decompressFromBase64(t);if(dc&&dc.length>2){const d=JSON.parse(dc);return{format:'lzstring',data:d,encoder:d=>LZString.compressToBase64(JSON.stringify(d)),raw:text,buf}}}catch{}
+    }
+    try{const dc=atob(t);const d=JSON.parse(dc);return{format:'b64json',data:d,encoder:d=>btoa(JSON.stringify(d)),raw:text}}catch{}
+    try{const d=parseYAML(text);const k=Object.keys(d||{});if(k.length>0&&k[0]!=='_root')return{format:'yaml',data:d,encoder:d=>yamlStringify(d),raw:text}}catch{}
+    try{const d=parseXML(text);return{format:'xml',data:d,encoder:null,raw:text}}catch{}
+    try{const d=parseINI(text);if(d&&Object.keys(d).length>0)return{format:'ini',data:d,encoder:d=>iniStringify(d),raw:text}}catch{}
+    // Plain readable text
+    if([...text].slice(0,200).filter(c=>c.charCodeAt(0)>31||c==='\n'||c==='\r'||c==='\t').length>150){
+      return{format:'log',data:text,encoder:null,raw:text};
+    }
+  }
+  if(buf){
+    const bytes=new Uint8Array(buf);
+    if(isSQLite(bytes))return{format:'sqlite',data:parseSQLiteHeader(bytes),encoder:null,raw:text,buf};
+    if(bytes[0]===0x04&&bytes[1]===0x08){
+      try{const m=new Marshal(buf);return{format:'marshal',data:m.read(),encoder:null,raw:text,buf}}catch{}
+    }
+    if(bytes[0]===0x4D&&bytes[1]===0x43&&bytes.length===131072)
+      return{format:'json',data:parsePSXMemCard(bytes),encoder:null,raw:text,buf};
+    if(typeof pako!=='undefined'){
+      try{const dec=pako.inflate(bytes);const s=new TextDecoder('utf-8').decode(dec);const d=JSON.parse(s);return{format:'json',data:d,encoder:null,raw:text,buf}}catch{}
+      try{
+        const recovered=new Uint8Array(text.length);for(let i=0;i<text.length;i++)recovered[i]=text.charCodeAt(i);
+        const dec=pako.inflate(recovered);const s=new TextDecoder('utf-8').decode(dec);const d=JSON.parse(s);
+        return{format:'json',data:d,encoder:null,raw:text,buf};
+      }catch{}
+    }
+    return{format:'binary',data:bytes,encoder:null,raw:text,buf};
+  }
+  return{format:'log',data:text||'(empty file)',encoder:null,raw:text};
+}
+
+async function parseFile(file) {
+  const ext=file.name.split('.').pop().toLowerCase();
+  let text='', buf=null;
+  try{text=await readText(file)}catch{}
+  try{buf=await readBuf(file)}catch{}
+  const t=(text||'').trim();
+
+  // RMMZSAVE
+  if(ext==='rmmzsave'){
+    if(typeof LZString!=='undefined'){try{const dc=LZString.decompressFromBase64(t);if(dc&&dc.length>2){const d=JSON.parse(dc);return{format:'lzstring',data:d,encoder:d=>LZString.compressToBase64(JSON.stringify(d)),raw:text,buf}}}catch{}}
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text,buf}}catch{}
+    if(buf&&typeof pako!=='undefined'){
+      try{const td=new TextDecoder('utf-8').decode(buf);const rc=new Uint8Array(td.length);for(let i=0;i<td.length;i++)rc[i]=td.charCodeAt(i);const dec=pako.inflate(rc);const json=new TextDecoder('utf-8').decode(dec);const d=JSON.parse(json);const encoder=d=>{const jb=new TextEncoder().encode(JSON.stringify(d));const comp=pako.deflate(jb,{level:1});let s='';for(let i=0;i<comp.length;i+=8192)s+=String.fromCharCode(...comp.slice(i,i+8192));return s};return{format:'rmmzsave',data:d,encoder,raw:text,buf}}catch{}
+    }
+  }
+  // RPGSAVE
+  if(ext==='rpgsave'||ext==='save'){
+    if(typeof LZString!=='undefined'){try{const dc=LZString.decompressFromBase64(t);if(dc&&dc.length>2){const d=JSON.parse(dc);return{format:'lzstring',data:d,encoder:d=>LZString.compressToBase64(JSON.stringify(d)),raw:text,buf}}}catch{}}
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text,buf}}catch{}
+  }
+  // ES3 / BAK
+  if(ext==='es3'||ext==='bak'){
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text,buf}}catch{}
+    return{format:'es3',data:{_encrypted:true,_file:file.name,_size:file.size},encoder:null,raw:text,buf};
+  }
+  // VDF
+  if(ext==='vdf'){try{const d=parseVDF(text);return{format:'vdf',data:d,encoder:d=>vdfStringify(d),raw:text}}catch{}}
+  // YAML
+  if(ext==='yml'||ext==='yaml'){
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text}}catch{}
+    try{const d=parseYAML(text);return{format:'yaml',data:d,encoder:d=>yamlStringify(d),raw:text}}catch{}
+  }
+  // XML
+  if(ext==='xml'){
+    try{const d=parseXML(text);return{format:'xml',data:d,encoder:null,raw:text}}catch(e){
+      return{format:'log',data:`XML parse error: ${e.message}\n\n${text}`,encoder:null,raw:text};
+    }
+  }
+  // SQLite
+  if(ext==='db'||ext==='sqlite'||ext==='sqlite3'){
+    if(buf&&isSQLite(new Uint8Array(buf)))return{format:'sqlite',data:parseSQLiteHeader(new Uint8Array(buf)),encoder:null,raw:text,buf};
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text}}catch{}
+  }
+  // INI / Config
+  if(['conf','opt','options','settings','prefs'].includes(ext)){
+    try{const d=JSON.parse(t);return{format:'json',data:d,encoder:d=>JSON.stringify(d,null,2),raw:text}}catch{}
+    try{const d=parseYAML(text);const k=Object.keys(d||{});if(k.length>0)return{format:'yaml',data:d,encoder:d=>yamlStringify(d),raw:text}}catch{}
+    try{const d=parseINI(text);return{format:'ini',data:d,encoder:d=>iniStringify(d),raw:text}}catch{}
+    return{format:'log',data:text,encoder:null,raw:text};
+  }
+  // Console binary saves
+  if(CONSOLE_EXTS.has(ext)){
+    if(buf){const b=new Uint8Array(buf);
+      if(b[0]===0x4D&&b[1]===0x43)return{format:'json',data:parsePSXMemCard(b),encoder:null,raw:text,buf};
+      return{format:'json',data:parseSRAMInfo(b,ext),encoder:null,raw:text,buf};
+    }
+  }
+  // RVDATA2/3 — Ruby Marshal
+  if(ext==='rvdata'||ext==='rvdata2'||ext==='rvdata3'||ext==='rxdata'){
+    if(buf){try{const m=new Marshal(buf);return{format:'marshal',data:m.read(),encoder:null,raw:text,buf}}catch(e){return{format:'error',data:{_error:e.message},encoder:null,raw:text,buf}}}
+  }
+  // Log / text
+  if(['log','txt','ini','cfg','csv'].includes(ext))return{format:'log',data:text,encoder:null,raw:text};
+  // Generic saves — try everything
+  if(GENERIC_EXTS.has(ext))return await tryGenericChain(text,buf,ext);
+  // Fallback: content detection
+  const r=await parseContent(text,buf);r.raw=r.raw||text;r.buf=r.buf||buf;return r;
+}
+
+// VDF parser
+function parseVDF(text) {
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const root = {}, stack = [root];
+  let pk = null;
+  for (const line of lines) {
+    if(line==='{'){
+      if(pk){const o={};stack[stack.length-1][pk]=o;stack.push(o);pk=null}
+    } else if(line==='}'){
+      if(stack.length>1)stack.pop();
+    } else {
+      const m=line.match(/^"([^"]*)"(?:\s+"([^"]*)")?/);
+      if(m){m[2]!==undefined?stack[stack.length-1][m[1]]=m[2]:pk=m[1]}
+    }
+  }
+  return root;
+}
+
+// ═══════════════════════════════════════════════════
+// ES3 DECRYPT ENGINE (Web Crypto API)
+// ═══════════════════════════════════════════════════
+async function decryptES3(arrayBuffer, password){
+  if(!arrayBuffer)return null;
+  const bytes=new Uint8Array(arrayBuffer), enc=new TextEncoder();
+
+  async function pbk(pwd,salt,iters=1000,bits=128){
+    const km=await crypto.subtle.importKey('raw',enc.encode(pwd),'PBKDF2',false,['deriveKey']);
+    const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt:enc.encode(salt),iterations:iters,hash:'SHA-1'},km,{name:'AES-CBC',length:bits},true,['decrypt']);
+    return new Uint8Array(await crypto.subtle.exportKey('raw',k));
+  }
+  async function pbkRaw(pwd,salt,iters=1000,bits=128){
+    const km=await crypto.subtle.importKey('raw',enc.encode(pwd),'PBKDF2',false,['deriveKey']);
+    const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iters,hash:'SHA-1'},km,{name:'AES-CBC',length:bits},true,['decrypt']);
+    return new Uint8Array(await crypto.subtle.exportKey('raw',k));
+  }
+  async function tryAES(keyBytes,iv,ct){
+    try{
+      if(!ct||ct.length%16!==0)return null;
+      const k=await crypto.subtle.importKey('raw',keyBytes,'AES-CBC',false,['decrypt']);
+      const pt=await crypto.subtle.decrypt({name:'AES-CBC',iv},k,ct);
+      let txt=new TextDecoder('utf-8',{fatal:true}).decode(pt);
+      txt=txt.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g,'').trim();
+      if((txt.startsWith('{')||txt.startsWith('['))&&txt.includes('"'))return txt;
+      return null;
+    }catch{return null}
+  }
+
+  const iv0=bytes.slice(0,16), ct0=bytes.slice(16);
+  const iv8=bytes.slice(8,24),  ct8=bytes.slice(24);
+  const iv16=bytes.slice(16,32),ct16=bytes.slice(32);
+
+  // Scheme A: raw UTF8 password zero-padded to 16B
+  const rawKey=new Uint8Array(16); rawKey.set(enc.encode(password).slice(0,16));
+  const rA=await tryAES(rawKey,iv0,ct0); if(rA)return{text:rA,scheme:'raw-key'};
+
+  // Scheme B-F: PBKDF2 with various known ES3 salts
+  const SALTS=['t*s3N4e','Easy Save 3','ES3','EasySave3','moodkie','unity','salt',''];
+  for(const salt of SALTS){
+    if(!salt)continue;
+    const k=await pbk(password,salt).catch(()=>null); if(!k)continue;
+    const r=await tryAES(k,iv0,ct0)||await tryAES(k,iv8,ct8)||await tryAES(k,iv16,ct16);
+    if(r)return{text:r,scheme:`pbkdf2:${salt}`};
+  }
+
+  // Scheme G: file-embedded 8B salt + 16B IV
+  const k8=await pbkRaw(password,bytes.slice(0,8)).catch(()=>null);
+  if(k8){const r=await tryAES(k8,iv8,ct8);if(r)return{text:r,scheme:'salt8'}}
+
+  // Scheme H: file-embedded 16B salt + 16B IV
+  const k16=await pbkRaw(password,bytes.slice(0,16)).catch(()=>null);
+  if(k16){const r=await tryAES(k16,iv16,ct16);if(r)return{text:r,scheme:'salt16'}}
+
+  // Scheme I: SHA256 PBKDF2
+  for(const salt of SALTS.slice(0,3)){
+    try{
+      const km=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);
+      const ck=await crypto.subtle.deriveKey({name:'PBKDF2',salt:enc.encode(salt),iterations:1000,hash:'SHA-256'},km,{name:'AES-CBC',length:128},true,['decrypt']);
+      const k=new Uint8Array(await crypto.subtle.exportKey('raw',ck));
+      const r=await tryAES(k,iv0,ct0); if(r)return{text:r,scheme:`pbkdf2-sha256:${salt}`};
+    }catch{}
+  }
+  return null;
+}
+
+// Dictionary: ~200 common ES3/game passwords
+const ES3_DICT=[
+  '','password','Password','PASSWORD','password1','Password1',
+  'taskbarhero','TaskBarHero','TASKBARHERO','tbhero','TBHero','TBH',
+  'tesseractstudio','TesseractStudio','TESSERACTSTUDIO',
+  'taskbar','TaskBar','hero','Hero','HERO',
+  'savedata','SaveData','SAVEDATA','save_data','Save_Data',
+  'gamedata','GameData','game_data','Game_Data',
+  'unity','Unity','unity3d','Unity3D','UnityGame',
+  'coretbh','CoreTBH','core_tbh','CoreTbh',
+  'moodkie','Moodkie','MOODKIE','easysave','EasySave','EasySave3',
+  'playerpref','PlayerPrefs','playerprefs',
+  '1234','12345','123456','1234567890','12345678',
+  'abcdef','abcdefgh','abcdefghijklmnop',
+  'qwerty','asdfgh','zxcvbn',
+  'steam','Steam','STEAM','SteamUser',
+  'save','Save','SAVE','saving','Saving',
+  'user','User','player','Player','PLAYER',
+  'game','Game','GAME','level','Level',
+  'live','Live','LIVE','online','Online',
+  'backup','Backup','BACKUP','data','Data','DATA',
+  'korea','Korean','한국어','KR',
+  'juju4','215346085',
+  'default','Default','DEFAULT','test','Test',
+  'secret','Secret','SECRET','key','Key','KEY',
+  'abc123','ABC123','test123','Test123',
+  'letmein','LetMeIn','master','Master',
+  'admin','Admin','root','Root',
+  '0000','0000000000000000','aaaa','aaaaaaaaaaaaaaaa',
+  'TBH_SAVE','tbh_save','tbh-save','TBH-SAVE',
+  'TaskBarHeroSave','taskbarhero_save','TaskBarHero_Save',
+  'TesseractStudioSave','TesseractSave',
+  'HeroSave','heroSave','hero_save','Hero_Save',
+];
+
+async function decryptES3WithDict(arrayBuffer, onProgress){
+  const total=ES3_DICT.length;
+  for(let i=0;i<total;i++){
+    const pwd=ES3_DICT[i];
+    if(onProgress&&i%10===0)onProgress(i,total,pwd);
+    const r=await decryptES3(arrayBuffer,pwd);
+    if(r)return{...r,password:pwd};
+    // Yield to UI every 20 passwords
+    if(i%20===0)await new Promise(r=>setTimeout(r,0));
+  }
+  return null;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1630,19 +1891,28 @@ function decryptRpgmvp(bytes,key){
   out.set(bytes.slice(32),16);return out;
 }
 async function loadGalleryFiles(files){
-  const imgs=files.filter(f=>/\.(rpgmvp|png_)$/i.test(f.name));
+  const IMG_EXTS=/\.(rpgmvp|png_|png|jpg|jpeg|webp|gif|bmp|svg|avif|tif|tiff)$/i;
+  const MIME_MAP={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',
+    gif:'image/gif',bmp:'image/bmp',svg:'image/svg+xml',avif:'image/avif',
+    tif:'image/tiff',tiff:'image/tiff',rpgmvp:'image/png',png_:'image/png'};
+  const imgs=files.filter(f=>IMG_EXTS.test(f.name));
   if(!imgs.length)return false;
   let added=0;
   for(const f of imgs){
     const buf=await readBuf(f);const bytes=new Uint8Array(buf);
-    let png=null;
+    const ext=f.name.split('.').pop().toLowerCase();
+    const mime=MIME_MAP[ext]||'image/octet-stream';
+    let blobData=null, encrypted=false;
     if(isRpgmv(bytes)){
       if(!App.gallery.detectedKey){App.gallery.detectedKey=detectGalKey(bytes);App.gallery.keyHex=galKeyHex(App.gallery.detectedKey)}
-      png=decryptRpgmvp(bytes,App.gallery.detectedKey);
-    }else if(bytes[0]===0x89&&bytes[1]===0x50){png=bytes}
-    if(!png)continue;
-    const url=URL.createObjectURL(new Blob([png],{type:'image/png'}));
-    App.gallery.images.push({id:++uid,name:f.name,blobUrl:url,bytes,size:f.size,encrypted:isRpgmv(bytes)});
+      blobData=decryptRpgmvp(bytes,App.gallery.detectedKey);
+      encrypted=true;
+    } else {
+      blobData=bytes; // plain image
+    }
+    if(!blobData)continue;
+    const url=URL.createObjectURL(new Blob([blobData],{type:mime}));
+    App.gallery.images.push({id:++uid,name:f.name,blobUrl:url,bytes:encrypted?bytes:null,size:f.size,encrypted});
     added++;
   }
   if(added>0){App.tab='gallery';render();toast(`Gallery: ${added} image${added!==1?'s':''} loaded`)}
@@ -1663,7 +1933,7 @@ function buildGalleryView(){
   const wrap=document.createElement('div');wrap.className='gal-wrap';
   if(!G.images.length){
     const em=document.createElement('div');em.className='gal-empty';
-    em.innerHTML='<i class="ti ti-photo" style="font-size:32px;display:block;margin-bottom:12px;color:var(--mu)"></i>No RPGMVP images loaded.<br>Click <b>Images</b> in the header or drag &amp; drop .rpgmvp files.';
+    em.innerHTML='<i class="ti ti-photo" style="font-size:32px;display:block;margin-bottom:12px;color:var(--mu)"></i>No images loaded.<br>Click <b>Images</b> in the header or drag &amp; drop<br>.rpgmvp · .png · .jpg · .webp · .gif · .bmp · .svg…';
     wrap.appendChild(em);return wrap;
   }
   // Toolbar
@@ -1713,7 +1983,7 @@ function buildGalleryView(){
     th.alt=img.name;th.loading='lazy';tw.appendChild(th);item.appendChild(tw);
     const info=document.createElement('div');info.className='gal-info';
     const nm=document.createElement('div');nm.className='gal-iname';
-    nm.textContent=img.name.replace(/\.(rpgmvp|png_)$/i,'');nm.title=img.name;
+    nm.textContent=img.name.replace(/\.(rpgmvp|png_|png|jpg|jpeg|webp|gif|bmp|svg|avif|tiff?)$/i,'');nm.title=img.name;
     const sz=document.createElement('div');sz.className='gal-isize';
     sz.textContent=(img.size/1024).toFixed(1)+' KB'+(img.encrypted?' · enc':'');
     info.appendChild(nm);info.appendChild(sz);item.appendChild(info);
@@ -1750,7 +2020,7 @@ function showLightbox(sorted,startIdx){
     cur=((idx%sorted.length)+sorted.length)%sorted.length;
     const img=sorted[cur];
     imgEl.src=img.blobUrl;fnEl.textContent=img.name;
-    dlA.href=img.blobUrl;dlA.download=img.name.replace(/\.rpgmvp$/i,'.png');
+    dlA.href=img.blobUrl;dlA.download=img.name.replace(/\.(rpgmvp|png_)$/i,'')+'.'+img.name.split('.').pop().replace(/rpgmvp|png_/i,'png');
     imgEl.onload=()=>meta.textContent=`${imgEl.naturalWidth}×${imgEl.naturalHeight}px · ${(img.size/1024).toFixed(1)} KB · ${cur+1}/${sorted.length}`;
     meta.textContent='Loading…';
   };
@@ -2101,7 +2371,7 @@ function buildWelcome(){
       <div class="dz-t">Drop save files here</div>
       <div class="dz-s">or click to browse</div>
       <div class="fmt-chips">
-        ${['.rpgsave','.rmmzsave','.rvdata2','.rvdata','.rxdata','.json','.nson','.dat','.data','.sav','.save'].map(x=>`<span class="fmt-chip">${x}</span>`).join('')}
+        ${['.rpgsave','.rmmzsave','.rvdata2','.rvdata3','.rxdata','.es3','.bak','.json','.yml','.xml','.ini','.vdf','.sqlite','.srm','.mcr','.gam','.fos','…'].map(x=>`<span class="fmt-chip">${x}</span>`).join('')}
       </div>
     </div>
     <div class="welcome-tip">
@@ -2542,10 +2812,6 @@ function addKey(fileId, path, isArr){
 }
 
 // Patch undo to handle __DELETED__ sentinel
-const _origSetPath=setPath;
-const _patchedUndo=doUndo;
-// Override doUndo to handle deletion undo
-const _realDoUndo=doUndo;
 
 // ═══════════════════════════════════════════════════
 // COMPARE INLINE EDIT
