@@ -541,6 +541,239 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 ::-webkit-scrollbar-track{background:var(--s1)}
 ::-webkit-scrollbar-thumb{background:var(--b1);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--b2)}
+
+/* ── LAYER COMPOSITOR ── */
+.comp-workspace {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  grid-template-rows: 1fr 140px;
+  height: 100%;
+  background: var(--bg);
+}
+.comp-canvas-area {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  background: repeating-conic-gradient(var(--s2) 0% 25%, var(--s3) 0% 50%) 0 0/24px 24px;
+  border-right: 1px solid var(--b0);
+  border-bottom: 1px solid var(--b0);
+}
+.comp-canvas-wrap {
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  border: 1px solid var(--b1);
+  background: transparent;
+  transform-origin: center center;
+}
+.comp-layer-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+.comp-panel {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  background: var(--s1);
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--b0);
+  overflow: hidden;
+}
+.comp-panel-hdr {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--b0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.comp-panel-title {
+  font-weight: 700;
+  color: var(--cb);
+}
+.comp-layer-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.comp-layer-item {
+  background: var(--s2);
+  border: 1px solid var(--b0);
+  border-radius: var(--r);
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  user-select: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.comp-layer-item:hover {
+  background: var(--s3);
+  border-color: var(--b1);
+}
+.comp-layer-item.active {
+  border-color: var(--ca);
+  background: rgba(229, 121, 26, 0.12);
+  color: var(--cb);
+}
+.comp-layer-hdr {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.comp-layer-name {
+  font-size: 11px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.comp-layer-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.comp-layer-btn {
+  background: transparent;
+  border: none;
+  color: var(--mu);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 13px;
+}
+.comp-layer-btn:hover {
+  color: var(--tx);
+  background: var(--s3);
+}
+.comp-layer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+}
+.comp-layer-slider {
+  flex: 1;
+  accent-color: var(--ca);
+  height: 4px;
+}
+.comp-layer-inp {
+  background: var(--bg);
+  border: 1px solid var(--b0);
+  color: var(--tx);
+  font-family: var(--mono);
+  font-size: 10px;
+  width: 44px;
+  text-align: center;
+  padding: 1px;
+  outline: none;
+}
+.comp-layer-inp:focus {
+  border-color: var(--ca);
+}
+.comp-timeline {
+  grid-column: 1;
+  grid-row: 2;
+  background: var(--s2);
+  border-top: 1px solid var(--b0);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.comp-timeline-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--b0);
+  background: var(--s1);
+}
+.comp-timeline-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--mu);
+  letter-spacing: .06em;
+  font-weight: 700;
+}
+.comp-timeline-frames {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 12px;
+  overflow-x: auto;
+}
+.comp-frame-card {
+  background: var(--s3);
+  border: 1px solid var(--b1);
+  border-radius: var(--r);
+  padding: 8px;
+  min-width: 72px;
+  height: 60px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+}
+.comp-frame-card.act {
+  border-color: var(--ca);
+  background: rgba(229,121,26,0.1);
+  color: var(--cb);
+}
+.comp-frame-card .del {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  color: var(--mu);
+  display: none;
+}
+.comp-frame-card:hover .del {
+  display: block;
+}
+.comp-frame-card .del:hover {
+  color: var(--rd);
+}
+.gal-chk-wrap {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 10;
+  display: none;
+}
+.gal-chk-wrap.show {
+  display: block;
+}
+.gal-chk {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ca);
+  cursor: pointer;
+}
+.comp-canvas-info {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(7, 16, 27, 0.7);
+  padding: 4px 8px;
+  border-radius: var(--r);
+  font-size: 11px;
+  color: var(--hi);
+  z-index: 5;
+}
 </style>
 </head>
 <body>
@@ -596,10 +829,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
     <div id="logo">SAVE<b>FORGE</b></div>
     <div class="spacer"></div>
     <span class="undo-info" id="undo-info"></span>
-    <input type="file" id="fi" multiple accept=".rpgsave,.rmmzsave,.rvdata,.rvdata2,.rvdata3,.rxdata,.json,.nson,.dat,.data,.sav,.save,.es3,.bak,.vdf,.log,.txt,.ini,.cfg,.csv,.conf,.opt,.options,.settings,.prefs,.yml,.yaml,.xml,.gam,.game,.fos,.ess,.sol,.plr,.player,.profile,.world,.wld,.map,.state,.progress,.checkpoint,.slot,.slot0,.slot1,.slot2,.slot3,.quicksave,.autosave,.persist,.persistent,.stats,.record,.replay,.rec,.dem,.demo,.bin,.db,.sqlite,.sqlite3,.srm,.eep,.fla,.mcr,.dsv,.psv,.sps,.pcsav,.chr,.hero,.party,.campaign,.mission,.level,.playerdata,.gamedata,.savegame,.gamesave,.profiledata,.account,.storage,.archive,.bundle,.pack,.pak,.cache,.cloudsave,.nhd,.household,.traveldb" hidden>
+    <input type="file" id="fi" multiple accept=".rpgsave,.rmmzsave,.rvdata,.rvdata2,.rvdata3,.rxdata,.json,.nson,.dat,.data,.sav,.save,.es3,.bak,.vdf,.log,.txt,.ini,.cfg,.csv,.conf,.opt,.options,.settings,.prefs,.yml,.yaml,.xml,.gam,.game,.fos,.ess,.sol,.plr,.player,.profile,.world,.wld,.map,.state,.progress,.checkpoint,.slot,.slot0,.slot1,.slot2,.slot3,.quicksave,.autosave,.persist,.persistent,.stats,.record,.replay,.rec,.dem,.demo,.bin,.db,.sqlite,.sqlite3,.srm,.eep,.fla,.mcr,.dsv,.psv,.sps,.pcsav,.chr,.hero,.party,.campaign,.mission,.level,.playerdata,.gamedata,.savegame,.gamesave,.profiledata,.account,.storage,.archive,.bundle,.pack,.pak,.cache,.cloudsave,.nhd,.household,.traveldb,.nlch" hidden>
     <button class="hbtn" id="fnr-btn" title="Find &amp; Replace (Ctrl+H)"><i class="ti ti-replace"></i></button>
     <button class="hbtn" id="jtp-btn" title="Jump to path (Ctrl+G)"><i class="ti ti-arrow-right"></i></button>
-    <input type="file" id="gfi" multiple accept=".rpgmvp,.png_,.png,.jpg,.jpeg,.webp,.gif,.bmp,.svg,.avif,.tif,.tiff" hidden>
+    <input type="file" id="gfi" multiple accept=".rpgmvp,.png_,.png,.jpg,.jpeg,.webp,.gif,.bmp,.svg,.avif,.tif,.tiff,.nlch" hidden>
     <button class="hbtn" id="gal-btn" title="Load images (RPGMVP, PNG, JPG, WebP, GIF, BMP, SVG…)"><i class="ti ti-photo"></i> Images</button>
     <button class="hbtn" id="paste-btn"><i class="ti ti-clipboard"></i> Paste</button>
     <button class="hbtn" id="lb"><i class="ti ti-folder-open"></i> Load</button>
@@ -645,7 +878,17 @@ const App = {
   viewMode: 'tree',
   searchOpts: { matchCase: false, wholeWord: false, regex: false },
   cmpOpts: { hideNull: true, numbersOnly: false, pathFilter: '', showDelta: true, groupBy: false, sortCol: -1, sortDir: 1 },
-  gallery: { images: [], detectedKey: null, keyHex: '', sort: 'name', zoom: 'gz-m', lb: null }
+  gallery: { images: [], detectedKey: null, keyHex: '', sort: 'name', zoom: 'gz-m', lb: null },
+  gallerySelectMode: false,
+  gallerySelected: [],
+  compositor: {
+    layers: [],
+    frames: [{ duration: 200, layersState: {} }],
+    currentFrame: 0,
+    isPlaying: false,
+    fps: 5,
+    zoom: 1
+  }
 };
 let uid = 0;
 
@@ -1891,10 +2134,10 @@ function decryptRpgmvp(bytes,key){
   out.set(bytes.slice(32),16);return out;
 }
 async function loadGalleryFiles(files){
-  const IMG_EXTS=/\.(rpgmvp|png_|png|jpg|jpeg|webp|gif|bmp|svg|avif|tif|tiff)$/i;
+  const IMG_EXTS=/\.(rpgmvp|png_|png|jpg|jpeg|webp|gif|bmp|svg|avif|tif|tiff|nlch)$/i;
   const MIME_MAP={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',
     gif:'image/gif',bmp:'image/bmp',svg:'image/svg+xml',avif:'image/avif',
-    tif:'image/tiff',tiff:'image/tiff',rpgmvp:'image/png',png_:'image/png'};
+    tif:'image/tiff',tiff:'image/tiff',rpgmvp:'image/png',png_:'image/png',nlch:'video/webm'};
   const imgs=files.filter(f=>IMG_EXTS.test(f.name));
   if(!imgs.length)return false;
   let added=0;
@@ -1959,11 +2202,59 @@ function buildGalleryView(){
   };
   tb.appendChild(mkSel([['name','Sort: Name'],['rname','Sort: Name ↓'],['size','Sort: Size']],G.sort,v=>{G.sort=v;renderContent()}));
   tb.appendChild(mkSel([['gz-xs','Tiny (80px)'],['gz-s','Small (120px)'],['gz-m','Medium (170px)'],['gz-l','Large (240px)'],['gz-xl','XLarge (320px)']],G.zoom,v=>{G.zoom=v;renderContent()}));
+  // Select Mode button
+  const selBtn=document.createElement('button');selBtn.className='hbtn'+(App.gallerySelectMode?' p':'');
+  selBtn.innerHTML=`<i class="ti ti-square-check"></i> ${App.gallerySelectMode?'Cancel Selection':'Select Mode'}`;
+  selBtn.addEventListener('click',()=>{
+    App.gallerySelectMode=!App.gallerySelectMode;
+    if(!App.gallerySelectMode) App.gallerySelected=[];
+    renderContent();
+  });
+  tb.appendChild(selBtn);
+
+  // Compositor button
+  const compBtn=document.createElement('button');compBtn.className='hbtn p';
+  compBtn.innerHTML='<i class="ti ti-layers-intersect"></i> Compositor';
+  compBtn.disabled=App.gallerySelected.length<1;
+  compBtn.addEventListener('click',()=>{
+    openCompositor(App.gallerySelected);
+  });
+  tb.appendChild(compBtn);
+
+  // Gallery Auto-Sequence button
+  const autoSeqGalBtn = document.createElement('button');
+  autoSeqGalBtn.className = 'hbtn p';
+  autoSeqGalBtn.innerHTML = '<i class="ti ti-wand"></i> Auto-Sequence';
+  autoSeqGalBtn.title = 'Scans entire gallery for sequences and opens them in the compositor';
+  autoSeqGalBtn.onclick = () => {
+    const seqs = detectSequences(G.images);
+    if (seqs && seqs.length > 0) {
+      const ids = [];
+      seqs.forEach(seq => {
+        seq.items.forEach(item => {
+          if (!ids.includes(item.layer.id)) {
+            ids.push(item.layer.id);
+          }
+        });
+      });
+      if (ids.length > 0) {
+        App.gallerySelected = ids;
+        App.gallerySelectMode = true;
+        openCompositor(ids);
+      }
+    } else {
+      toast('No file sequences detected in the entire gallery');
+    }
+  };
+  tb.appendChild(autoSeqGalBtn);
+
   const clrBtn=document.createElement('button');clrBtn.className='hbtn';
   clrBtn.innerHTML='<i class="ti ti-trash"></i> Clear';
   clrBtn.addEventListener('click',()=>{
     G.images.forEach(i=>URL.revokeObjectURL(i.blobUrl));
     G.images=[];G.detectedKey=null;G.keyHex='';
+    App.gallerySelected=[];
+    App.gallerySelectMode=false;
     App.tab=App.files.length?App.files[0].id:null;render();
   });
   tb.appendChild(clrBtn);
@@ -1978,16 +2269,53 @@ function buildGalleryView(){
   });
   sorted.forEach((img,idx)=>{
     const item=document.createElement('div');item.className='gal-item';
+    if(App.gallerySelected.includes(img.id)) item.classList.add('selected');
+    
+    // Selection checkbox
+    const chkWrap=document.createElement('div');
+    chkWrap.className='gal-chk-wrap'+(App.gallerySelectMode?' show':'');
+    const chk=document.createElement('input');chk.type='checkbox';chk.className='gal-chk';
+    chk.checked=App.gallerySelected.includes(img.id);
+    chk.addEventListener('click',e=>e.stopPropagation());
+    chk.addEventListener('change',()=>{
+      if(chk.checked){
+        if(!App.gallerySelected.includes(img.id))App.gallerySelected.push(img.id);
+        item.classList.add('selected');
+      } else {
+        App.gallerySelected=App.gallerySelected.filter(id=>id!==img.id);
+        item.classList.remove('selected');
+      }
+      compBtn.disabled=App.gallerySelected.length<1;
+    });
+    chkWrap.appendChild(chk);item.appendChild(chkWrap);
+
     const tw=document.createElement('div');tw.className='gal-thumb-wrap';
-    const th=document.createElement('img');th.className='gal-thumb';th.src=img.blobUrl;
-    th.alt=img.name;th.loading='lazy';tw.appendChild(th);item.appendChild(tw);
+    let th;
+    if(img.name.toLowerCase().endsWith('.nlch')){
+      th=document.createElement('video');th.className='gal-thumb';th.src=img.blobUrl;
+      th.muted=true;th.loop=true;th.playsInline=true;
+      item.addEventListener('mouseenter',()=>th.play().catch(()=>{}));
+      item.addEventListener('mouseleave',()=>{th.pause();th.currentTime=0});
+    } else {
+      th=document.createElement('img');th.className='gal-thumb';th.src=img.blobUrl;
+      th.alt=img.name;th.loading='lazy';
+    }
+    tw.appendChild(th);item.appendChild(tw);
     const info=document.createElement('div');info.className='gal-info';
     const nm=document.createElement('div');nm.className='gal-iname';
-    nm.textContent=img.name.replace(/\.(rpgmvp|png_|png|jpg|jpeg|webp|gif|bmp|svg|avif|tiff?)$/i,'');nm.title=img.name;
+    nm.textContent=img.name.replace(/\.(rpgmvp|png_|png|jpg|jpeg|webp|gif|bmp|svg|avif|tiff?|nlch)$/i,'');nm.title=img.name;
     const sz=document.createElement('div');sz.className='gal-isize';
-    sz.textContent=(img.size/1024).toFixed(1)+' KB'+(img.encrypted?' · enc':'');
+    sz.textContent=(img.size/1024).toFixed(1)+' KB'+(img.encrypted?' · enc':'')+(img.name.toLowerCase().endsWith('.nlch')?' · video':'');
     info.appendChild(nm);info.appendChild(sz);item.appendChild(info);
-    item.addEventListener('click',()=>showLightbox(sorted,idx));
+    
+    item.addEventListener('click',()=>{
+      if(App.gallerySelectMode){
+        chk.checked=!chk.checked;
+        chk.dispatchEvent(new Event('change'));
+      } else {
+        showLightbox(sorted,idx);
+      }
+    });
     grid.appendChild(item);
   });
   body.appendChild(grid);wrap.appendChild(body);
@@ -1997,7 +2325,8 @@ function showLightbox(sorted,startIdx){
   let cur=startIdx;
   const lb=document.getElementById('gal-lb');lb.innerHTML='';
   const bg=document.createElement('div');bg.className='gal-lb-bg';
-  bg.addEventListener('click',()=>lb.classList.remove('show'));lb.appendChild(bg);
+  const close=()=>{vidEl.src='';lb.classList.remove('show')};
+  bg.addEventListener('click',close);lb.appendChild(bg);
   const box=document.createElement('div');box.className='gal-lb-box';
   const hdr=document.createElement('div');hdr.className='gal-lb-hdr';
   const fnEl=document.createElement('div');fnEl.className='gal-lb-fname';
@@ -2008,10 +2337,11 @@ function showLightbox(sorted,startIdx){
   smBtn.addEventListener('click',()=>{smooth=!smooth;imgEl.classList.toggle('smooth',smooth)});
   const closeBtn=document.createElement('button');closeBtn.className='gal-lb-close';
   closeBtn.innerHTML='<i class="ti ti-x" style="font-size:14px"></i>';
-  closeBtn.addEventListener('click',()=>lb.classList.remove('show'));
+  closeBtn.addEventListener('click',close);
   hdr.appendChild(fnEl);hdr.appendChild(smBtn);hdr.appendChild(dlA);hdr.appendChild(closeBtn);
   const iw=document.createElement('div');iw.className='gal-lb-imgwrap';
   const imgEl=document.createElement('img');imgEl.className='gal-lb-img';iw.appendChild(imgEl);
+  const vidEl=document.createElement('video');vidEl.className='gal-lb-img';vidEl.controls=true;vidEl.autoplay=true;vidEl.loop=true;vidEl.style.display='none';iw.appendChild(vidEl);
   const meta=document.createElement('div');meta.className='gal-lb-meta';
   const foot=document.createElement('div');foot.className='gal-lb-foot';
   const prevBtn=document.createElement('button');prevBtn.className='gal-nav prev';prevBtn.textContent='‹';
@@ -2019,10 +2349,25 @@ function showLightbox(sorted,startIdx){
   const load=idx=>{
     cur=((idx%sorted.length)+sorted.length)%sorted.length;
     const img=sorted[cur];
-    imgEl.src=img.blobUrl;fnEl.textContent=img.name;
-    dlA.href=img.blobUrl;dlA.download=img.name.replace(/\.(rpgmvp|png_)$/i,'')+'.'+img.name.split('.').pop().replace(/rpgmvp|png_/i,'png');
-    imgEl.onload=()=>meta.textContent=`${imgEl.naturalWidth}×${imgEl.naturalHeight}px · ${(img.size/1024).toFixed(1)} KB · ${cur+1}/${sorted.length}`;
-    meta.textContent='Loading…';
+    const isVideo=img.name.toLowerCase().endsWith('.nlch');
+    if(isVideo){
+      imgEl.style.display='none';
+      vidEl.style.display='block';
+      vidEl.src=img.blobUrl;
+      fnEl.textContent=img.name;
+      dlA.href=img.blobUrl;dlA.download=img.name;
+      dlA.innerHTML='<i class="ti ti-download"></i> Video';
+      meta.textContent=`Video · ${(img.size/1024).toFixed(1)} KB · ${cur+1}/${sorted.length}`;
+    } else {
+      vidEl.style.display='none';vidEl.src='';
+      imgEl.style.display='block';
+      imgEl.src=img.blobUrl;
+      fnEl.textContent=img.name;
+      dlA.href=img.blobUrl;dlA.download=img.name.replace(/\.(rpgmvp|png_)$/i,'')+'.'+img.name.split('.').pop().replace(/rpgmvp|png_/i,'png');
+      dlA.innerHTML='<i class="ti ti-download"></i> PNG';
+      imgEl.onload=()=>meta.textContent=`${imgEl.naturalWidth}×${imgEl.naturalHeight}px · ${(img.size/1024).toFixed(1)} KB · ${cur+1}/${sorted.length}`;
+      meta.textContent='Loading…';
+    }
   };
   prevBtn.addEventListener('click',e=>{e.stopPropagation();load(cur-1)});
   nextBtn.addEventListener('click',e=>{e.stopPropagation();load(cur+1)});
@@ -2033,7 +2378,11 @@ function showLightbox(sorted,startIdx){
 document.addEventListener('keydown',e=>{
   const lb=document.getElementById('gal-lb');
   if(!lb?.classList.contains('show'))return;
-  if(e.key==='Escape')lb.classList.remove('show');
+  if(e.key==='Escape'){
+    const v=lb.querySelector('video');
+    if(v)v.src='';
+    lb.classList.remove('show');
+  }
   if(e.key==='ArrowLeft')document.querySelector('.gal-nav.prev')?.click();
   if(e.key==='ArrowRight')document.querySelector('.gal-nav.next')?.click();
 });
@@ -2412,6 +2761,14 @@ function updateTabs(){
     tab.addEventListener('click',()=>{App.tab='gallery';render()});
     el.appendChild(tab);
   }
+  if(App.compositor.layers.length>0){
+    const tab=document.createElement('div');
+    tab.className='tab'+(App.tab==='compositor'?' act':'');
+    if(App.tab==='compositor')tab.style.cssText='color:var(--cy)';
+    tab.innerHTML=`<i class="ti ti-layers-intersect" style="font-size:13px;color:var(--cy)"></i><span class="tn">Compositor</span>`;
+    tab.addEventListener('click',()=>{App.tab='compositor';render()});
+    el.appendChild(tab);
+  }
 }
 
 function updateSidebar(){
@@ -2425,6 +2782,20 @@ function updateSidebar(){
     info.innerHTML=`<div>${App.gallery.images.length} image${App.gallery.images.length!==1?'s':''}</div>`
       +`<div>Formats: RPGMVP/PNG</div>`
       +(App.gallery.keyHex?`<div style="margin-top:4px;font-size:9px;word-break:break-all;color:var(--mu)">Key:<br>${App.gallery.keyHex}</div>`:'');
+    sb.appendChild(info);return;
+  }
+  if(App.tab==='compositor'){
+    const s=document.createElement('div');s.className='sb-sect';
+    s.innerHTML=`<div class="sb-hdr">Compositor</div><div class="cat act"><i class="ti ti-layers-intersect"></i>Workspace</div>`;
+    sb.appendChild(s);
+    const info=document.createElement('div');info.className='sb-info';
+    info.innerHTML=`<div>Layers: <b>${App.compositor.layers.length}</b></div>
+      <div>Frames: <b>${App.compositor.frames.length}</b></div>
+      <div style="margin-top: 10px; line-height: 1.5; color: var(--mu)">
+        • Drag/drop layers to reorder<br>
+        • Move with offset controls<br>
+        • Create timeline animations
+      </div>`;
     sb.appendChild(info);return;
   }
   if(!af||App.tab==='compare'){
@@ -2461,6 +2832,7 @@ function updateSidebar(){
 function renderContent(){
   const va=document.getElementById('va');va.innerHTML='';
   if(App.tab==='gallery'){va.appendChild(buildGalleryView());return}
+  if(App.tab==='compositor'){va.appendChild(buildCompositorView());return}
   if(!App.files.length){va.appendChild(buildWelcome());return}
   if(App.tab==='compare'){va.appendChild(buildCompareView(App.files));return}
   const af=App.files.find(f=>f.id===App.tab);
@@ -2521,6 +2893,9 @@ function updateStatus(){
   const sta=document.getElementById('sta');
   if(App.tab==='gallery'){
     sta.innerHTML=`<span class="st-dot ok"></span><span>${App.gallery.images.length} images</span>`+(App.gallery.keyHex?`<span class="st-sep">|</span><span style="color:var(--mu)">Key: ${App.gallery.keyHex.slice(0,8)}…</span>`:'')+`<span style="flex:1"></span><span>← → navigate · Esc close lightbox</span><span class="st-sep">|</span><span>SaveForge v2.2</span>`;return;
+  }
+  if(App.tab==='compositor'){
+    sta.innerHTML=`<span class="st-dot ok"></span><span>Layer Compositor</span><span style="flex:1"></span><span>Timeline frame control · Keyframe animations</span><span class="st-sep">|</span><span>SaveForge v2.2</span>`;return;
   }
   const af=App.files.find(f=>f.id===App.tab);
   const mods=App.files.filter(f=>f.modified).length;
@@ -2624,8 +2999,8 @@ document.addEventListener('dragleave',e=>{if(!e.relatedTarget)document.getElemen
 document.addEventListener('drop',async e=>{
   e.preventDefault();document.getElementById('dov').classList.remove('show');
   const all=[...e.dataTransfer.files];
-  const imgs=all.filter(f=>/\.(rpgmvp|png_)$/i.test(f.name));
-  const saves=all.filter(f=>!/\.(rpgmvp|png_)$/i.test(f.name));
+  const imgs=all.filter(f=>/\.(rpgmvp|png_|png|jpg|jpeg|webp|gif|bmp|svg|avif|tif|tiff|nlch)$/i.test(f.name));
+  const saves=all.filter(f=>!/\.(rpgmvp|png_|png|jpg|jpeg|webp|gif|bmp|svg|avif|tif|tiff|nlch)$/i.test(f.name));
   if(imgs.length)await loadGalleryFiles(imgs);
   if(saves.length)loadFiles(saves);
 });
@@ -2871,6 +3246,568 @@ document.addEventListener('keydown', e=>{
     if(e.key==='r'||e.key==='R'){e.preventDefault();App.searchOpts.regex=!App.searchOpts.regex;syncModeBtns();if(App.search)renderContent()}
   }
 });
+
+// ═══════════════════════════════════════════════════
+// LAYER COMPOSITOR
+// ═══════════════════════════════════════════════════
+function compareSuffixes(s1, s2) {
+  const m1 = String(s1).match(/^([a-zA-Z]*)([0-9]*)$/) || ["", "", ""];
+  const m2 = String(s2).match(/^([a-zA-Z]*)([0-9]*)$/) || ["", "", ""];
+  const l1 = m1[1].toLowerCase();
+  const l2 = m2[1].toLowerCase();
+  if (l1 !== l2) return l1.localeCompare(l2);
+  const n1 = parseInt(m1[2]) || 0;
+  const n2 = parseInt(m2[2]) || 0;
+  return n1 - n2;
+}
+
+function detectSequences(layers) {
+  const parsed = layers.map(layer => {
+    const nameWithoutExt = layer.name.replace(/\.[^/.]+$/, "");
+    const match = nameWithoutExt.match(/^(.*?)[_-]?([a-zA-Z]*[0-9]+|[a-zA-Z])$/);
+    if (match) {
+      const cleanBase = match[1].replace(/[_-]?action[a-zA-Z0-9]*/gi, "").toLowerCase();
+      return {
+        layer,
+        base: cleanBase,
+        originalBase: match[1],
+        suffix: match[2]
+      };
+    }
+    const cleanBase = nameWithoutExt.replace(/[_-]?action[a-zA-Z0-9]*/gi, "").toLowerCase();
+    return { layer, base: cleanBase, originalBase: nameWithoutExt, suffix: null };
+  });
+
+  const groups = {};
+  parsed.forEach(item => {
+    if (!groups[item.base]) groups[item.base] = [];
+    groups[item.base].push(item);
+  });
+
+  const sequences = [];
+  Object.entries(groups).forEach(([base, items]) => {
+    if (items.length > 1 && items.some(i => i.suffix !== null)) {
+      items.sort((a, b) => {
+        if (a.suffix === null) return 1;
+        if (b.suffix === null) return -1;
+        return compareSuffixes(a.suffix, b.suffix);
+      });
+      const displayName = items[0].originalBase.replace(/[_-]?action[a-zA-Z0-9]*$/gi, "");
+      sequences.push({
+        base,
+        name: displayName || base,
+        items: items
+      });
+    }
+  });
+
+  return sequences;
+}
+
+function applySequence(seqIndex) {
+  const C = App.compositor;
+  if (!C.detectedSequences) return;
+  C.selectedSequenceIndex = seqIndex;
+  const seq = C.detectedSequences[seqIndex];
+  if (!seq) return;
+
+  const frames = [];
+  const maxFrames = seq.items.length;
+  for (let f = 0; f < maxFrames; f++) {
+    const layersState = {};
+    C.layers.forEach(l => {
+      layersState[l.id] = { visible: false, opacity: 1 };
+    });
+    const activeItem = seq.items[f];
+    if (activeItem) {
+      layersState[activeItem.layer.id] = { visible: true, opacity: 1 };
+    }
+    frames.push({ duration: 200, layersState });
+  }
+  C.frames = frames;
+  C.currentFrame = 0;
+  C.dom = null;
+  renderContent();
+}
+
+function openCompositor(selectedIds) {
+  const selectedImages = App.gallery.images.filter(img => selectedIds.includes(img.id));
+  if (!selectedImages.length) return;
+
+  // Build layers. Maintain selection order
+  App.compositor.layers = selectedImages.map((img, index) => {
+    return {
+      id: img.id,
+      name: img.name,
+      blobUrl: img.blobUrl,
+      x: 0,
+      y: 0,
+      visible: true,
+      opacity: 1,
+      zIndex: index
+    };
+  });
+
+  // Calculate canvas dimensions once
+  App.compositor.width = 500;
+  App.compositor.height = 600;
+  
+  let loadedCount = 0;
+  App.compositor.layers.forEach(layer => {
+    const tempImg = new Image();
+    tempImg.src = layer.blobUrl;
+    tempImg.onload = () => {
+      if (tempImg.naturalWidth > App.compositor.width) App.compositor.width = tempImg.naturalWidth;
+      if (tempImg.naturalHeight > App.compositor.height) App.compositor.height = tempImg.naturalHeight;
+      loadedCount++;
+      if (loadedCount === App.compositor.layers.length) {
+        const wrap = document.querySelector('.comp-canvas-wrap');
+        const info = document.querySelector('.comp-canvas-info');
+        if (wrap) {
+          wrap.style.width = App.compositor.width + 'px';
+          wrap.style.height = App.compositor.height + 'px';
+        }
+        if (info) {
+          info.textContent = `Canvas: ${App.compositor.width}×${App.compositor.height}px · Zoom: ${Math.round(App.compositor.zoom * 100)}%`;
+        }
+      }
+    };
+  });
+
+  // Try to automatically build animation sequences
+  const seqs = detectSequences(App.compositor.layers);
+  if (seqs && seqs.length > 0) {
+    App.compositor.detectedSequences = seqs;
+    App.compositor.selectedSequenceIndex = 0;
+    const seq = seqs[0];
+    const frames = [];
+    for (let f = 0; f < seq.items.length; f++) {
+      const layersState = {};
+      App.compositor.layers.forEach(l => {
+        layersState[l.id] = { visible: false, opacity: 1 };
+      });
+      const activeItem = seq.items[f];
+      if (activeItem) {
+        layersState[activeItem.layer.id] = { visible: true, opacity: 1 };
+      }
+      frames.push({ duration: 200, layersState });
+    }
+    App.compositor.frames = frames;
+    toast(`Auto-detected ${seqs.length} sequence(s). Loaded "${seq.name}" (${frames.length} frames)`);
+  } else {
+    App.compositor.detectedSequences = [];
+    App.compositor.selectedSequenceIndex = -1;
+    // Default keyframes
+    App.compositor.frames = [
+      { duration: 200, layersState: {} }
+    ];
+    // Initialize first frame layer state (only first layer visible by default)
+    App.compositor.layers.forEach((layer, idx) => {
+      App.compositor.frames[0].layersState[layer.id] = { visible: idx === 0, opacity: 1 };
+    });
+  }
+
+  App.compositor.dom = null;
+  App.compositor.currentFrame = 0;
+  App.compositor.isPlaying = false;
+  App.compositor.zoom = 1;
+  App.tab = 'compositor';
+  render();
+}
+
+function syncCompositorState() {
+  const C = App.compositor;
+  if (!C.dom) return;
+
+  const currentFrameData = C.frames[C.currentFrame] || { layersState: {} };
+
+  // 1. Update layers display and properties on the persistent DOM elements
+  C.layers.forEach(layer => {
+    const state = currentFrameData.layersState[layer.id] || { visible: false, opacity: 1 };
+    if (layer.el) {
+      layer.el.style.display = state.visible ? 'block' : 'none';
+      layer.el.style.opacity = state.opacity;
+      layer.el.style.left = '0px';
+      layer.el.style.top = '0px';
+      layer.el.style.zIndex = layer.zIndex;
+    }
+  });
+
+  // 2. Update active highlight on timeline frame cards
+  const cards = C.dom.querySelectorAll('.comp-frame-card');
+  cards.forEach((card, idx) => {
+    if (idx === C.currentFrame) {
+      card.classList.add('act');
+    } else {
+      card.classList.remove('act');
+    }
+    const frame = C.frames[idx];
+    if (frame) {
+      const delayEl = card.querySelector('div:last-child');
+      if (delayEl) {
+        delayEl.textContent = `${frame.duration}ms`;
+      }
+    }
+  });
+
+  // 3. Update active highlight on layer items in list
+  const listItems = C.dom.querySelectorAll('.comp-layer-item');
+  listItems.forEach(item => {
+    const lid = item.getAttribute('data-layer-id');
+    const state = currentFrameData.layersState[lid] || { visible: false };
+    if (state.visible) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+
+  // 4. Sync Speed selector value
+  const speedSel = C.dom.querySelector('.comp-timeline-hdr select');
+  if (speedSel) {
+    const curFrame = C.frames[C.currentFrame] || {};
+    speedSel.value = curFrame.duration || 200;
+  }
+}
+
+let animInterval = null;
+
+function buildCompositorView() {
+  const C = App.compositor;
+
+  if (C.dom) {
+    syncCompositorState();
+    return C.dom;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'comp-workspace';
+
+  // --- CANVAS AREA ---
+  const canvasArea = document.createElement('div');
+  canvasArea.className = 'comp-canvas-area';
+
+  const canvasWrap = document.createElement('div');
+  canvasWrap.className = 'comp-canvas-wrap';
+  
+  // Use pre-calculated dimensions synchronously
+  const maxW = C.width || 500;
+  const maxH = C.height || 600;
+  canvasWrap.style.width = maxW + 'px';
+  canvasWrap.style.height = maxH + 'px';
+
+  // Ensure all layers have their elements created, and append them
+  C.layers.forEach(layer => {
+    if (!layer.el) {
+      if (layer.name.toLowerCase().endsWith('.nlch')) {
+        const vid = document.createElement('video');
+        vid.className = 'comp-layer-img';
+        vid.src = layer.blobUrl;
+        vid.muted = true;
+        vid.autoplay = true;
+        vid.loop = true;
+        vid.playsInline = true;
+        layer.el = vid;
+      } else {
+        const img = document.createElement('img');
+        img.className = 'comp-layer-img';
+        img.src = layer.blobUrl;
+        layer.el = img;
+      }
+    }
+    canvasWrap.appendChild(layer.el);
+  });
+
+  // Apply zoom
+  canvasWrap.style.transform = `scale(${C.zoom})`;
+  canvasArea.appendChild(canvasWrap);
+
+  const canvasInfo = document.createElement('div');
+  canvasInfo.className = 'comp-canvas-info';
+  canvasInfo.textContent = `Canvas: ${maxW}×${maxH}px · Zoom: ${Math.round(C.zoom * 100)}%`;
+  canvasArea.appendChild(canvasInfo);
+
+  // Zoom controls overlay
+  const zoomControls = document.createElement('div');
+  zoomControls.style.cssText = 'position:absolute;top:10px;left:10px;display:flex;gap:4px;z-index:10;';
+  const zIn = document.createElement('button'); zIn.className = 'hbtn'; zIn.innerHTML = '<i class="ti ti-zoom-in"></i>';
+  zIn.onclick = () => { C.zoom = Math.min(4, C.zoom + 0.1); canvasWrap.style.transform = `scale(${C.zoom})`; canvasInfo.textContent = `Canvas: ${canvasWrap.offsetWidth}×${canvasWrap.offsetHeight}px · Zoom: ${Math.round(C.zoom * 100)}%`; };
+  const zOut = document.createElement('button'); zOut.className = 'hbtn'; zOut.innerHTML = '<i class="ti ti-zoom-out"></i>';
+  zOut.onclick = () => { C.zoom = Math.max(0.2, C.zoom - 0.1); canvasWrap.style.transform = `scale(${C.zoom})`; canvasInfo.textContent = `Canvas: ${canvasWrap.offsetWidth}×${canvasWrap.offsetHeight}px · Zoom: ${Math.round(C.zoom * 100)}%`; };
+  const zFit = document.createElement('button'); zFit.className = 'hbtn'; zFit.innerHTML = '100%';
+  zFit.onclick = () => { C.zoom = 1; canvasWrap.style.transform = `scale(${C.zoom})`; canvasInfo.textContent = `Canvas: ${canvasWrap.offsetWidth}×${canvasWrap.offsetHeight}px · Zoom: ${Math.round(C.zoom * 100)}%`; };
+  zoomControls.appendChild(zIn); zoomControls.appendChild(zOut); zoomControls.appendChild(zFit);
+  canvasArea.appendChild(zoomControls);
+
+  wrap.appendChild(canvasArea);
+
+  // --- RIGHT PANEL: LAYERS MANAGER (Simplified: Select Active Image per Frame) ---
+  const panel = document.createElement('div');
+  panel.className = 'comp-panel';
+
+  const panelHdr = document.createElement('div');
+  panelHdr.className = 'comp-panel-hdr';
+  panelHdr.innerHTML = '<span class="comp-panel-title">Frames Images</span>';
+  panel.appendChild(panelHdr);
+
+  const layerList = document.createElement('div');
+  layerList.className = 'comp-layer-list';
+
+  const currentFrameData = C.frames[C.currentFrame] || { layersState: {} };
+  const renderedLayers = [...C.layers].sort((a,b) => b.zIndex - a.zIndex);
+  renderedLayers.forEach((layer) => {
+    const item = document.createElement('div');
+    item.className = 'comp-layer-item';
+    item.setAttribute('data-layer-id', layer.id);
+
+    const itemHdr = document.createElement('div');
+    itemHdr.className = 'comp-layer-hdr';
+
+    const isVideo = layer.name.toLowerCase().endsWith('.nlch');
+    itemHdr.innerHTML = `<i class="ti ${isVideo ? 'ti-video' : 'ti-photo'}" style="color:var(--mu)"></i>`;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'comp-layer-name';
+    nameSpan.textContent = layer.name;
+    itemHdr.appendChild(nameSpan);
+
+    const controls = document.createElement('div');
+    controls.className = 'comp-layer-controls';
+
+    // Delete Layer
+    const delBtn = document.createElement('button');
+    delBtn.className = 'comp-layer-btn';
+    delBtn.style.color = 'var(--rd)';
+    delBtn.innerHTML = '<i class="ti ti-trash"></i>';
+    delBtn.onclick = (e) => {
+      e.stopPropagation();
+      C.layers = C.layers.filter(l => l.id !== layer.id);
+      C.dom = null;
+      renderContent();
+    };
+    controls.appendChild(delBtn);
+
+    itemHdr.appendChild(controls);
+    item.appendChild(itemHdr);
+
+    // Clicking selects it as the single active image for this frame
+    item.onclick = () => {
+      const currentFrameData = C.frames[C.currentFrame] || { layersState: {} };
+      C.layers.forEach(l => {
+        currentFrameData.layersState[l.id] = { visible: l.id === layer.id, opacity: 1 };
+      });
+      syncCompositorState();
+    };
+
+    layerList.appendChild(item);
+  });
+  panel.appendChild(layerList);
+
+  // Panel footer
+  const panelFoot = document.createElement('div');
+  panelFoot.style.cssText = 'padding:12px;border-top:1px solid var(--b0);display:flex;flex-direction:column;gap:6px;';
+  
+  const mergeBtn = document.createElement('button');
+  mergeBtn.className = 'hbtn p';
+  mergeBtn.innerHTML = '<i class="ti ti-download"></i> Save Frame PNG';
+  mergeBtn.onclick = () => exportMergedCanvas(maxW, maxH);
+  panelFoot.appendChild(mergeBtn);
+
+  const backBtn = document.createElement('button');
+  backBtn.className = 'hbtn';
+  backBtn.innerHTML = '<i class="ti ti-arrow-left"></i> Back to Gallery';
+  backBtn.onclick = () => {
+    C.isPlaying = false;
+    clearTimeout(animInterval);
+    App.tab = 'gallery';
+    render();
+  };
+  panelFoot.appendChild(backBtn);
+
+  panel.appendChild(panelFoot);
+  wrap.appendChild(panel);
+
+  // --- TIMELINE PANEL (BOTTOM) ---
+  const timeline = document.createElement('div');
+  timeline.className = 'comp-timeline';
+
+  const timelineHdr = document.createElement('div');
+  timelineHdr.className = 'comp-timeline-hdr';
+  timelineHdr.innerHTML = '<span class="comp-timeline-title">Timeline &amp; Animation</span>';
+
+  // Animation Controls
+  const playBtn = document.createElement('button');
+  playBtn.className = 'hbtn' + (C.isPlaying ? ' p' : '');
+  playBtn.innerHTML = C.isPlaying ? '<i class="ti ti-player-pause"></i> Pause' : '<i class="ti ti-player-play"></i> Play';
+  playBtn.onclick = () => {
+    C.isPlaying = !C.isPlaying;
+    if (C.isPlaying) {
+      const runInterval = () => {
+        clearTimeout(animInterval);
+        const frame = C.frames[C.currentFrame];
+        const duration = frame ? frame.duration : 200;
+        animInterval = setTimeout(() => {
+          C.currentFrame = (C.currentFrame + 1) % C.frames.length;
+          syncCompositorState();
+          runInterval();
+        }, duration);
+      };
+      runInterval();
+    } else {
+      clearTimeout(animInterval);
+    }
+    playBtn.className = 'hbtn' + (C.isPlaying ? ' p' : '');
+    playBtn.innerHTML = C.isPlaying ? '<i class="ti ti-player-pause"></i> Pause' : '<i class="ti ti-player-play"></i> Play';
+  };
+  timelineHdr.appendChild(playBtn);
+
+  // FPS speed select
+  timelineHdr.appendChild(document.createTextNode('Frame Delay:'));
+  const speedSel = document.createElement('select');
+  speedSel.className = 'gal-sel';
+  [[100,'100ms'],[200,'200ms'],[300,'300ms'],[500,'500ms'],[1000,'1s']].forEach(([ms,lbl])=>{
+    const o=document.createElement('option');o.value=ms;o.textContent=lbl;
+    if(((C.frames[C.currentFrame] || {}).duration || 200) === ms)o.selected=true;
+    speedSel.appendChild(o);
+  });
+  speedSel.onchange = () => {
+    const curFrame = C.frames[C.currentFrame];
+    if(curFrame) curFrame.duration = parseInt(speedSel.value);
+    syncCompositorState();
+  };
+  timelineHdr.appendChild(speedSel);
+
+  // Add keyframe button
+  const addFrameBtn = document.createElement('button');
+  addFrameBtn.className = 'hbtn';
+  addFrameBtn.innerHTML = '<i class="ti ti-plus"></i> Add Frame';
+  addFrameBtn.onclick = () => {
+    const currentState = currentFrameData.layersState;
+    const newState = {};
+    C.layers.forEach(layer => {
+      const lState = currentState[layer.id] || { visible: false, opacity: 1 };
+      newState[layer.id] = { ...lState };
+    });
+    C.frames.push({ duration: 200, layersState: newState });
+    C.currentFrame = C.frames.length - 1;
+    C.dom = null;
+    renderContent();
+  };
+  timelineHdr.appendChild(addFrameBtn);
+
+  // Auto-Sequence button
+  const autoSeqBtn = document.createElement('button');
+  autoSeqBtn.className = 'hbtn';
+  autoSeqBtn.innerHTML = '<i class="ti ti-wand"></i> Auto-Sequence';
+  autoSeqBtn.title = 'Parse filenames to build animation frames automatically';
+  autoSeqBtn.onclick = () => {
+    const seqs = detectSequences(C.layers);
+    if (seqs && seqs.length > 0) {
+      C.detectedSequences = seqs;
+      applySequence(0);
+      toast(`Auto-detected ${seqs.length} sequence(s)`);
+    } else {
+      toast('No file sequence detected');
+    }
+  };
+  timelineHdr.appendChild(autoSeqBtn);
+
+  // Sequence selection dropdown
+  if (C.detectedSequences && C.detectedSequences.length > 0) {
+    timelineHdr.appendChild(document.createTextNode(' Sequence:'));
+    const seqSel = document.createElement('select');
+    seqSel.className = 'gal-sel';
+    seqSel.style.maxWidth = '200px';
+    C.detectedSequences.forEach((seq, idx) => {
+      const o = document.createElement('option');
+      o.value = idx;
+      o.textContent = seq.name;
+      if (C.selectedSequenceIndex === idx) o.selected = true;
+      seqSel.appendChild(o);
+    });
+    seqSel.onchange = () => {
+      applySequence(parseInt(seqSel.value));
+    };
+    timelineHdr.appendChild(seqSel);
+  }
+
+  timeline.appendChild(timelineHdr);
+
+  // Render timeline frame cards
+  const frameList = document.createElement('div');
+  frameList.className = 'comp-timeline-frames';
+  C.frames.forEach((frame, idx) => {
+    const fc = document.createElement('div');
+    fc.className = 'comp-frame-card' + (idx === C.currentFrame ? ' act' : '');
+    fc.innerHTML = `<div>Frame ${idx + 1}</div><div style="font-size:9px;color:var(--mu)">${frame.duration}ms</div>`;
+    
+    if (C.frames.length > 1) {
+      const delF = document.createElement('span');
+      delF.className = 'del';
+      delF.innerHTML = '✕';
+      delF.onclick = e => {
+        e.stopPropagation();
+        C.frames = C.frames.filter((_, i) => i !== idx);
+        C.currentFrame = Math.max(0, C.currentFrame - 1);
+        C.dom = null;
+        renderContent();
+      };
+      fc.appendChild(delF);
+    }
+
+    fc.onclick = () => {
+      C.currentFrame = idx;
+      syncCompositorState();
+    };
+    frameList.appendChild(fc);
+  });
+  timeline.appendChild(frameList);
+
+  wrap.appendChild(timeline);
+  C.dom = wrap;
+  syncCompositorState();
+  return wrap;
+}
+
+function exportMergedCanvas(width, height) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+
+  const currentFrameData = App.compositor.frames[App.compositor.currentFrame] || { layersState: {} };
+  const sortedLayers = [...App.compositor.layers].sort((a,b) => a.zIndex - b.zIndex);
+
+  let loadedCount = 0;
+  const activeLayers = sortedLayers.filter(l => {
+    const state = currentFrameData.layersState[l.id] || { visible: l.visible };
+    return state.visible;
+  });
+
+  if (!activeLayers.length) {
+    toast('No visible layers to merge');
+    return;
+  }
+
+  activeLayers.forEach(layer => {
+    const state = currentFrameData.layersState[layer.id] || { opacity: layer.opacity };
+    const img = new Image();
+    img.src = layer.blobUrl;
+    img.onload = () => {
+      ctx.globalAlpha = state.opacity;
+      ctx.drawImage(img, layer.x, layer.y);
+      loadedCount++;
+      if (loadedCount === activeLayers.length) {
+        const url = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `composited_${Date.now()}.png`;
+        a.click();
+        toast('Merged PNG exported successfully');
+      }
+    };
+  });
+}
 
 // Init
 render();
